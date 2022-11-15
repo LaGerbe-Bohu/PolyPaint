@@ -1,0 +1,5 @@
+# ninja log v5
+8	1072	6902492583865346	PolyPaint/CMakeFiles/PolyPaint.dir/PolyPaint.cpp.obj	2fa2d705a7dfb3f6
+1072	1213	6902492585002294	PolyPaint/PolyPaint.exe	7ad7cb1fda147272
+13	260	6902493127024731	build.ninja	e3ec4ef82a223165
+11	1060	6902492583765611	PolyPaint/CMakeFiles/PolyPaint.dir/GLShader.cpp.obj	bbd9614d0be5c82c
