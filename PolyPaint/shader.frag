@@ -6,6 +6,7 @@ uniform vec2 u_mousePos;
 uniform mat4 u_projectionMatrix;
 uniform vec2 u_points[500];
 uniform int u_sizeOfPoints;
+uniform vec2 u_resolution;
 
 uniform vec2 u_fenetre[500];
 uniform int u_sizeOfFenetre;
@@ -40,33 +41,46 @@ void main(void){
     0.0,0.0,0.0,1.0
     );
 
+    float minres = min(u_resolution.x, u_resolution.y);
+
+    vec2 resolution = u_resolution;
+    vec2 uv = gl_FragCoord.xy / resolution.x;
+    vec2 position = u_mousePos.xy / resolution.x;
 
 
-    vec4 position = mat*vec4(u_mousePos.x,u_mousePos.y,0.0,1.0)  ;
 
-    vec3 src = vec3(0.1,0.1,0.1);
+ //   vec2 position =  (u_mousePos.xy - .5*u_resolution.xy) / minres;
+
+    vec3 src = vec3(0.1,0.1,0.11);
     float dist = 0.0;
+
+  
 
 
     for(int i = 0; i <u_sizeOfPoints-1;i++)
     {
-        src += drawLine(u_points[i],u_points[i+1],v_uv,0.001) * vec3(1.0,1.0,1.0);
+        vec2 pt = u_points[i].xy/resolution.x;
+        vec2 pt2 = u_points[i+1].xy/resolution.x;
+        src += drawLine(pt,pt2,uv,0.001) * vec3(1.0,1.0,1.0);
     }
 
     if(u_sizeOfPoints > 0){
-        src += drawLine(u_points[0],u_points[u_sizeOfPoints-1],v_uv,0.001) * vec3(1.0,1.0,1.0);
+        src += drawLine(u_points[0]/resolution.x,u_points[u_sizeOfPoints-1]/resolution.x,uv,0.001) * vec3(1.0,1.0,1.0);
     }
 
 
 
     for(int i = 0; i <u_sizeOfFenetre-1;i++)
     {
-
-        src += drawLine(u_fenetre[i],u_fenetre[i+1],v_uv,0.001) * vec3(0.0,0.0,1.0);
+        vec2 pt = u_fenetre[i].xy/resolution.x;
+        vec2 pt2 = u_fenetre[i+1].xy/resolution.x;
+         
+        src += drawLine(pt,pt2,uv,0.001) * vec3(0.0,0.0,1.0);
     }
 
     if(u_sizeOfFenetre > 0){
-        src += drawLine(u_fenetre[0],u_fenetre[u_sizeOfFenetre-1],v_uv,0.001) * vec3(0.0,0.0,1.0);
+           
+        src += drawLine(u_fenetre[0]/resolution.x,u_fenetre[u_sizeOfFenetre-1]/resolution.x,uv,0.001) * vec3(0.0,0.0,1.0);
     }
 
 
@@ -76,25 +90,25 @@ void main(void){
 
     for(int i = 0; i <u_sizeOfPoints;i++)
     {
-        dist += float(sqrt( pow(u_points[i].x - v_uv.x,2)+ (pow( u_points[i].y - v_uv.y ,2) * (9.0/16.0)) )<.003) ; // Pense à le faire avec le vrai projection matrix quand tu y arriveras
+        vec2 pt = u_points[i].xy/resolution.x;
+        dist += float(sqrt( pow(pt.x - uv.x,2)+ (pow( pt.y - uv.y ,2) ) )<.003) ; // Pense à le faire avec le vrai projection matrix quand tu y arriveras
         Point += dist * vec3(1.0,1.0,1.0);
     }
 
+     // src += float(sqrt( pow(position.x - uv.x,2)+ (pow( position.y - uv.y ,2)) )<.006) ; 
 
 
     for(int i = 0; i <u_sizeOfFenetre;i++)
     {
-        dist += float(sqrt( pow(u_fenetre[i].x - v_uv.x,2)+ (pow( u_fenetre[i].y - v_uv.y ,2) * (9.0/16.0)) )<.003); // Pense à le faire avec le vrai projection matrix quand tu y arriveras
+        vec2 f = u_fenetre[i].xy/resolution.x;
+        dist += float(sqrt( pow(f.x - uv.x,2)+ (pow( f.y - uv.y ,2)) )<.003); // Pense à le faire avec le vrai projection matrix quand tu y arriveras
         Point += dist * vec3(0.0,0.0,1.0);
     }
 
 
-
-
     src += Point;
 
-
-
+   
 
 
 

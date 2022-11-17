@@ -63,36 +63,6 @@ build CMakeFiles\rebuild_cache.util: CUSTOM_COMMAND
 
 build rebuild_cache: phony CMakeFiles\rebuild_cache.util
 
-
-#############################################
-# Utility command for list_install_components
-
-build list_install_components: phony
-
-
-#############################################
-# Utility command for install
-
-build CMakeFiles\install.util: CUSTOM_COMMAND all
-  COMMAND = cmd.exe /C "cd /D C:\OpenGlProject\PolyPaint\out\build\x86-debug && "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -P cmake_install.cmake"
-  DESC = Install the project...
-  pool = console
-  restat = 1
-
-build install: phony CMakeFiles\install.util
-
-
-#############################################
-# Utility command for install/local
-
-build CMakeFiles\install\local.util: CUSTOM_COMMAND all
-  COMMAND = cmd.exe /C "cd /D C:\OpenGlProject\PolyPaint\out\build\x86-debug && "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake"
-  DESC = Installing only the local directory...
-  pool = console
-  restat = 1
-
-build install\local: phony CMakeFiles\install\local.util
-
 # =============================================================================
 # Write statements declared in CMakeLists.txt:
 # C:/OpenGlProject/PolyPaint/CMakeLists.txt
@@ -105,19 +75,19 @@ build install\local: phony CMakeFiles\install\local.util
 #############################################
 # Order-only phony target for PolyPaint
 
-build cmake_object_order_depends_target_PolyPaint: phony || PolyPaint\CMakeFiles\PolyPaint.dir
+build cmake_object_order_depends_target_PolyPaint: phony || cmake_object_order_depends_target_imgui
 
 build PolyPaint\CMakeFiles\PolyPaint.dir\PolyPaint.cpp.obj: CXX_COMPILER__PolyPaint_Debug C$:\OpenGlProject\PolyPaint\PolyPaint\PolyPaint.cpp || cmake_object_order_depends_target_PolyPaint
-  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++20
-  INCLUDES = -IC:\OpenGlProject\PolyPaint\PolyPaint\..\libs\include\GLFW\include -IC:\OpenGlProject\PolyPaint\PolyPaint\..\libs\include\GLEW\include
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  INCLUDES = -IC:\OpenGlProject\PolyPaint\PolyPaint -IC:\OpenGlProject\PolyPaint\PolyPaint\..\libs\include\GLFW\include -IC:\OpenGlProject\PolyPaint\PolyPaint\..\libs\include\GLEW\include
   OBJECT_DIR = PolyPaint\CMakeFiles\PolyPaint.dir
   OBJECT_FILE_DIR = PolyPaint\CMakeFiles\PolyPaint.dir
   TARGET_COMPILE_PDB = PolyPaint\CMakeFiles\PolyPaint.dir\
   TARGET_PDB = PolyPaint\PolyPaint.pdb
 
 build PolyPaint\CMakeFiles\PolyPaint.dir\GLShader.cpp.obj: CXX_COMPILER__PolyPaint_Debug C$:\OpenGlProject\PolyPaint\PolyPaint\GLShader.cpp || cmake_object_order_depends_target_PolyPaint
-  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++20
-  INCLUDES = -IC:\OpenGlProject\PolyPaint\PolyPaint\..\libs\include\GLFW\include -IC:\OpenGlProject\PolyPaint\PolyPaint\..\libs\include\GLEW\include
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  INCLUDES = -IC:\OpenGlProject\PolyPaint\PolyPaint -IC:\OpenGlProject\PolyPaint\PolyPaint\..\libs\include\GLFW\include -IC:\OpenGlProject\PolyPaint\PolyPaint\..\libs\include\GLEW\include
   OBJECT_DIR = PolyPaint\CMakeFiles\PolyPaint.dir
   OBJECT_FILE_DIR = PolyPaint\CMakeFiles\PolyPaint.dir
   TARGET_COMPILE_PDB = PolyPaint\CMakeFiles\PolyPaint.dir\
@@ -131,10 +101,10 @@ build PolyPaint\CMakeFiles\PolyPaint.dir\GLShader.cpp.obj: CXX_COMPILER__PolyPai
 #############################################
 # Link the executable PolyPaint\PolyPaint.exe
 
-build PolyPaint\PolyPaint.exe: CXX_EXECUTABLE_LINKER__PolyPaint_Debug PolyPaint\CMakeFiles\PolyPaint.dir\PolyPaint.cpp.obj PolyPaint\CMakeFiles\PolyPaint.dir\GLShader.cpp.obj
+build PolyPaint\PolyPaint.exe: CXX_EXECUTABLE_LINKER__PolyPaint_Debug PolyPaint\CMakeFiles\PolyPaint.dir\PolyPaint.cpp.obj PolyPaint\CMakeFiles\PolyPaint.dir\GLShader.cpp.obj | PolyPaint\imgui\imgui.lib PolyPaint\imgui\imgui.lib || PolyPaint\imgui\imgui.lib
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   LINK_FLAGS = /machine:X86 /debug /INCREMENTAL /subsystem:console
-  LINK_LIBRARIES = glfw3.lib  opengl32.lib  glew32s.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
+  LINK_LIBRARIES = PolyPaint\imgui\imgui.lib  PolyPaint\imgui\imgui.lib  glfw3.lib  opengl32.lib  glew32s.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = PolyPaint\CMakeFiles\PolyPaint.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
@@ -166,35 +136,109 @@ build PolyPaint\CMakeFiles\rebuild_cache.util: CUSTOM_COMMAND
 
 build PolyPaint\rebuild_cache: phony PolyPaint\CMakeFiles\rebuild_cache.util
 
+# =============================================================================
+# Write statements declared in CMakeLists.txt:
+# C:/OpenGlProject/PolyPaint/PolyPaint/CMakeLists.txt
+# =============================================================================
+
+# =============================================================================
+# Object build statements for STATIC_LIBRARY target imgui
+
 
 #############################################
-# Utility command for list_install_components
+# Order-only phony target for imgui
 
-build PolyPaint\list_install_components: phony
+build cmake_object_order_depends_target_imgui: phony || PolyPaint\imgui\CMakeFiles\imgui.dir
+
+build PolyPaint\imgui\CMakeFiles\imgui.dir\imgui.cpp.obj: CXX_COMPILER__imgui_Debug C$:\OpenGlProject\PolyPaint\PolyPaint\imgui\imgui.cpp || cmake_object_order_depends_target_imgui
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  OBJECT_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  OBJECT_FILE_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  TARGET_COMPILE_PDB = PolyPaint\imgui\CMakeFiles\imgui.dir\imgui.pdb
+  TARGET_PDB = PolyPaint\imgui\imgui.pdb
+
+build PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_demo.cpp.obj: CXX_COMPILER__imgui_Debug C$:\OpenGlProject\PolyPaint\PolyPaint\imgui\imgui_demo.cpp || cmake_object_order_depends_target_imgui
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  OBJECT_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  OBJECT_FILE_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  TARGET_COMPILE_PDB = PolyPaint\imgui\CMakeFiles\imgui.dir\imgui.pdb
+  TARGET_PDB = PolyPaint\imgui\imgui.pdb
+
+build PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_draw.cpp.obj: CXX_COMPILER__imgui_Debug C$:\OpenGlProject\PolyPaint\PolyPaint\imgui\imgui_draw.cpp || cmake_object_order_depends_target_imgui
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  OBJECT_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  OBJECT_FILE_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  TARGET_COMPILE_PDB = PolyPaint\imgui\CMakeFiles\imgui.dir\imgui.pdb
+  TARGET_PDB = PolyPaint\imgui\imgui.pdb
+
+build PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_impl_glfw.cpp.obj: CXX_COMPILER__imgui_Debug C$:\OpenGlProject\PolyPaint\PolyPaint\imgui\imgui_impl_glfw.cpp || cmake_object_order_depends_target_imgui
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  OBJECT_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  OBJECT_FILE_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  TARGET_COMPILE_PDB = PolyPaint\imgui\CMakeFiles\imgui.dir\imgui.pdb
+  TARGET_PDB = PolyPaint\imgui\imgui.pdb
+
+build PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_impl_opengl3.cpp.obj: CXX_COMPILER__imgui_Debug C$:\OpenGlProject\PolyPaint\PolyPaint\imgui\imgui_impl_opengl3.cpp || cmake_object_order_depends_target_imgui
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  OBJECT_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  OBJECT_FILE_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  TARGET_COMPILE_PDB = PolyPaint\imgui\CMakeFiles\imgui.dir\imgui.pdb
+  TARGET_PDB = PolyPaint\imgui\imgui.pdb
+
+build PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_tables.cpp.obj: CXX_COMPILER__imgui_Debug C$:\OpenGlProject\PolyPaint\PolyPaint\imgui\imgui_tables.cpp || cmake_object_order_depends_target_imgui
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  OBJECT_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  OBJECT_FILE_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  TARGET_COMPILE_PDB = PolyPaint\imgui\CMakeFiles\imgui.dir\imgui.pdb
+  TARGET_PDB = PolyPaint\imgui\imgui.pdb
+
+build PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_widgets.cpp.obj: CXX_COMPILER__imgui_Debug C$:\OpenGlProject\PolyPaint\PolyPaint\imgui\imgui_widgets.cpp || cmake_object_order_depends_target_imgui
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  OBJECT_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  OBJECT_FILE_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  TARGET_COMPILE_PDB = PolyPaint\imgui\CMakeFiles\imgui.dir\imgui.pdb
+  TARGET_PDB = PolyPaint\imgui\imgui.pdb
+
+
+# =============================================================================
+# Link build statements for STATIC_LIBRARY target imgui
 
 
 #############################################
-# Utility command for install
+# Link the static library PolyPaint\imgui\imgui.lib
 
-build PolyPaint\CMakeFiles\install.util: CUSTOM_COMMAND PolyPaint\all
-  COMMAND = cmd.exe /C "cd /D C:\OpenGlProject\PolyPaint\out\build\x86-debug\PolyPaint && "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -P cmake_install.cmake"
-  DESC = Install the project...
+build PolyPaint\imgui\imgui.lib: CXX_STATIC_LIBRARY_LINKER__imgui_Debug PolyPaint\imgui\CMakeFiles\imgui.dir\imgui.cpp.obj PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_demo.cpp.obj PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_draw.cpp.obj PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_impl_glfw.cpp.obj PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_impl_opengl3.cpp.obj PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_tables.cpp.obj PolyPaint\imgui\CMakeFiles\imgui.dir\imgui_widgets.cpp.obj
+  LANGUAGE_COMPILE_FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  LINK_FLAGS = /machine:X86
+  OBJECT_DIR = PolyPaint\imgui\CMakeFiles\imgui.dir
+  POST_BUILD = cd .
+  PRE_LINK = cd .
+  TARGET_COMPILE_PDB = PolyPaint\imgui\CMakeFiles\imgui.dir\imgui.pdb
+  TARGET_FILE = PolyPaint\imgui\imgui.lib
+  TARGET_PDB = PolyPaint\imgui\imgui.pdb
+
+
+#############################################
+# Utility command for edit_cache
+
+build PolyPaint\imgui\CMakeFiles\edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cmd.exe /C "cd /D C:\OpenGlProject\PolyPaint\out\build\x86-debug\PolyPaint\imgui && "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
+  DESC = No interactive CMake dialog available...
+  restat = 1
+
+build PolyPaint\imgui\edit_cache: phony PolyPaint\imgui\CMakeFiles\edit_cache.util
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build PolyPaint\imgui\CMakeFiles\rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cmd.exe /C "cd /D C:\OpenGlProject\PolyPaint\out\build\x86-debug\PolyPaint\imgui && "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" --regenerate-during-build -SC:\OpenGlProject\PolyPaint -BC:\OpenGlProject\PolyPaint\out\build\x86-debug"
+  DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
 
-build PolyPaint\install: phony PolyPaint\CMakeFiles\install.util
-
-
-#############################################
-# Utility command for install/local
-
-build PolyPaint\CMakeFiles\install\local.util: CUSTOM_COMMAND PolyPaint\all
-  COMMAND = cmd.exe /C "cd /D C:\OpenGlProject\PolyPaint\out\build\x86-debug\PolyPaint && "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake"
-  DESC = Installing only the local directory...
-  pool = console
-  restat = 1
-
-build PolyPaint\install\local: phony PolyPaint\CMakeFiles\install\local.util
+build PolyPaint\imgui\rebuild_cache: phony PolyPaint\imgui\CMakeFiles\rebuild_cache.util
 
 # =============================================================================
 # Target aliases.
@@ -202,6 +246,10 @@ build PolyPaint\install\local: phony PolyPaint\CMakeFiles\install\local.util
 build PolyPaint: phony PolyPaint\PolyPaint.exe
 
 build PolyPaint.exe: phony PolyPaint\PolyPaint.exe
+
+build imgui: phony PolyPaint\imgui\imgui.lib
+
+build imgui.lib: phony PolyPaint\imgui\imgui.lib
 
 # =============================================================================
 # Folder targets.
@@ -218,7 +266,14 @@ build all: phony PolyPaint\all
 #############################################
 # Folder: C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint
 
-build PolyPaint\all: phony PolyPaint\PolyPaint.exe
+build PolyPaint\all: phony PolyPaint\PolyPaint.exe PolyPaint\imgui\all
+
+# =============================================================================
+
+#############################################
+# Folder: C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/imgui
+
+build PolyPaint\imgui\all: phony PolyPaint\imgui\imgui.lib
 
 # =============================================================================
 # Built-in targets
@@ -227,14 +282,14 @@ build PolyPaint\all: phony PolyPaint\PolyPaint.exe
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | C$:\OpenGlProject\PolyPaint\CMakeLists.txt C$:\OpenGlProject\PolyPaint\PolyPaint\CMakeLists.txt C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\FindOpenGL.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake CMakeCache.txt CMakeFiles\3.24.202208181-MSVC_2\CMakeCCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeCXXCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeRCCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | C$:\OpenGlProject\PolyPaint\CMakeLists.txt C$:\OpenGlProject\PolyPaint\PolyPaint\CMakeLists.txt C$:\OpenGlProject\PolyPaint\PolyPaint\imgui\CMakeLists.txt C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake CMakeCache.txt CMakeFiles\3.24.202208181-MSVC_2\CMakeCCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeCXXCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeRCCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build C$:\OpenGlProject\PolyPaint\CMakeLists.txt C$:\OpenGlProject\PolyPaint\PolyPaint\CMakeLists.txt C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\FindOpenGL.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake CMakeCache.txt CMakeFiles\3.24.202208181-MSVC_2\CMakeCCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeCXXCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeRCCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeSystem.cmake: phony
+build C$:\OpenGlProject\PolyPaint\CMakeLists.txt C$:\OpenGlProject\PolyPaint\PolyPaint\CMakeLists.txt C$:\OpenGlProject\PolyPaint\PolyPaint\imgui\CMakeLists.txt C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake C$:\Program$ Files\Microsoft$ Visual$ Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake CMakeCache.txt CMakeFiles\3.24.202208181-MSVC_2\CMakeCCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeCXXCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeRCCompiler.cmake CMakeFiles\3.24.202208181-MSVC_2\CMakeSystem.cmake: phony
 
 
 #############################################

@@ -1,11 +1,8 @@
 C:/OpenGlProject/PolyPaint/out/build/x86-debug/CMakeFiles/edit_cache.dir
 C:/OpenGlProject/PolyPaint/out/build/x86-debug/CMakeFiles/rebuild_cache.dir
-C:/OpenGlProject/PolyPaint/out/build/x86-debug/CMakeFiles/list_install_components.dir
-C:/OpenGlProject/PolyPaint/out/build/x86-debug/CMakeFiles/install.dir
-C:/OpenGlProject/PolyPaint/out/build/x86-debug/CMakeFiles/install/local.dir
 C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/CMakeFiles/PolyPaint.dir
 C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/CMakeFiles/edit_cache.dir
 C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/CMakeFiles/rebuild_cache.dir
-C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/CMakeFiles/list_install_components.dir
-C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/CMakeFiles/install.dir
-C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/CMakeFiles/install/local.dir
+C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/imgui/CMakeFiles/imgui.dir
+C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/imgui/CMakeFiles/edit_cache.dir
+C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/imgui/CMakeFiles/rebuild_cache.dir

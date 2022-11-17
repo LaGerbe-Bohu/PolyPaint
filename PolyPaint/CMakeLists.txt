@@ -1,32 +1,29 @@
-﻿# CMakeList.txt : CMake project for PolyPaint, include source and define
-# project specific logic here.
-#
+﻿
 
-# Add source to this project's executable.
+cmake_minimum_required(VERSION 3.6)
+project(PolyPaint)
 
-add_executable (PolyPaint "PolyPaint.cpp" "PolyPaint.h" "GLShader.cpp")
+set(CMAKE_CXX_STANDARD 11)
 
-
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET PolyPaint PROPERTY CXX_STANDARD 20)
-endif()
-
-
-# TODO: Add tests and install targets if needed.
-install(TARGETS PolyPaint DESTINATION  "PolyPaint/bin")
+set(CMAKE_VERBOSE_MAKEFILE 1)
+set(APP_VERSION_MAJOR 1)
+set(APP_VERSION_MINOR 0)
 
 
 
+add_subdirectory(imgui)
+include_directories(${PROJECT_SOURCE_DIR})
+add_executable (PolyPaint "PolyPaint.cpp"  "PolyPaint.h"  "GLShader.cpp")
 
-include_directories(../libs/include/GLFW/include)       
-include_directories(../libs/include/GLEW/include)
+target_link_libraries(PolyPaint imgui)
 
-
+# glfw
+include_directories(../libs/include/GLFW/include)     
 link_directories(../libs/include/GLFW/lib-static-ucrt )
+
+
+# glew
+include_directories(../libs/include/GLEW/include)
 link_directories(../libs/include/GLEW/lib/Release/Win32)
 
-
-find_package(OpenGL REQUIRED)
-
-
-target_link_libraries(PolyPaint glfw3 ${OPENGL_gl_LIBRARY} glew32s )
+target_link_libraries(PolyPaint imgui glfw3 ${OPENGL_gl_LIBRARY} glew32s )

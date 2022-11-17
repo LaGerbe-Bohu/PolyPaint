@@ -675,7 +675,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "2"
+			"value" : "3"
 		},
 		{
 			"name" : "CMAKE_PLATFORM_INFO_INITIALIZED",
@@ -1078,6 +1078,98 @@
 			"value" : "[opengl32][c ][v()]"
 		},
 		{
+			"name" : "GLEW_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "The directory containing a CMake configuration file for GLEW."
+				}
+			],
+			"type" : "PATH",
+			"value" : "GLEW_DIR-NOTFOUND"
+		},
+		{
+			"name" : "GLEW_INCLUDE_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a file."
+				}
+			],
+			"type" : "PATH",
+			"value" : "GLEW_INCLUDE_DIR-NOTFOUND"
+		},
+		{
+			"name" : "GLEW_SHARED_LIBRARY_DEBUG",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "GLEW_SHARED_LIBRARY_DEBUG-NOTFOUND"
+		},
+		{
+			"name" : "GLEW_SHARED_LIBRARY_RELEASE",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "GLEW_SHARED_LIBRARY_RELEASE-NOTFOUND"
+		},
+		{
+			"name" : "GLEW_STATIC_LIBRARY_DEBUG",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "GLEW_STATIC_LIBRARY_DEBUG-NOTFOUND"
+		},
+		{
+			"name" : "GLEW_STATIC_LIBRARY_RELEASE",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "GLEW_STATIC_LIBRARY_RELEASE-NOTFOUND"
+		},
+		{
 			"name" : "OPENGL_gl_LIBRARY",
 			"properties" : 
 			[
@@ -1119,7 +1211,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/OpenGlProject/PolyPaint/out/build/x86-debug"
+			"value" : "C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint"
 		},
 		{
 			"name" : "PolyPaint_IS_TOP_LEVEL",
@@ -1131,7 +1223,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "ON"
+			"value" : "OFF"
 		},
 		{
 			"name" : "PolyPaint_SOURCE_DIR",
@@ -1143,7 +1235,55 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/OpenGlProject/PolyPaint"
+			"value" : "C:/OpenGlProject/PolyPaint/PolyPaint"
+		},
+		{
+			"name" : "glfw3_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "The directory containing a CMake configuration file for glfw3."
+				}
+			],
+			"type" : "PATH",
+			"value" : "glfw3_DIR-NOTFOUND"
+		},
+		{
+			"name" : "imgui-opengl-glfw-glew-cmake-demo_BINARY_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint"
+		},
+		{
+			"name" : "imgui-opengl-glfw-glew-cmake-demo_IS_TOP_LEVEL",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "OFF"
+		},
+		{
+			"name" : "imgui-opengl-glfw-glew-cmake-demo_SOURCE_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "C:/OpenGlProject/PolyPaint/PolyPaint"
 		}
 	],
 	"kind" : "cache",

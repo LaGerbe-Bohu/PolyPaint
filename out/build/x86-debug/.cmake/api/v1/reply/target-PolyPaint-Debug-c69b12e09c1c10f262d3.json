@@ -14,10 +14,8 @@
 		"commands" : 
 		[
 			"add_executable",
-			"install",
 			"target_link_libraries",
-			"include_directories",
-			"set_property"
+			"include_directories"
 		],
 		"files" : 
 		[
@@ -31,37 +29,37 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 7,
+				"line" : 16,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 16,
+				"line" : 18,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 29,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 32,
+				"line" : 15,
 				"parent" : 0
 			},
 			{
-				"command" : 3,
+				"command" : 2,
 				"file" : 0,
 				"line" : 21,
 				"parent" : 0
 			},
 			{
-				"command" : 3,
+				"command" : 2,
 				"file" : 0,
-				"line" : 22,
-				"parent" : 0
-			},
-			{
-				"command" : 4,
-				"file" : 0,
-				"line" : 11,
+				"line" : 26,
 				"parent" : 0
 			}
 		]
@@ -73,19 +71,20 @@
 			[
 				{
 					"fragment" : "/DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1"
-				},
-				{
-					"fragment" : "-std:c++20"
 				}
 			],
 			"includes" : 
 			[
 				{
 					"backtrace" : 4,
-					"path" : "C:/OpenGlProject/PolyPaint/PolyPaint/../libs/include/GLFW/include"
+					"path" : "C:/OpenGlProject/PolyPaint/PolyPaint"
 				},
 				{
 					"backtrace" : 5,
+					"path" : "C:/OpenGlProject/PolyPaint/PolyPaint/../libs/include/GLFW/include"
+				},
+				{
+					"backtrace" : 6,
 					"path" : "C:/OpenGlProject/PolyPaint/PolyPaint/../libs/include/GLEW/include"
 				}
 			],
@@ -94,9 +93,9 @@
 			{
 				"backtraces" : 
 				[
-					6
+					1
 				],
-				"standard" : "20"
+				"standard" : "11"
 			},
 			"sourceIndexes" : 
 			[
@@ -105,21 +104,14 @@
 			]
 		}
 	],
-	"id" : "PolyPaint::@8af1e247f0afbf42ebbf",
-	"install" : 
-	{
-		"destinations" : 
-		[
-			{
-				"backtrace" : 2,
-				"path" : "PolyPaint/bin"
-			}
-		],
-		"prefix" : 
+	"dependencies" : 
+	[
 		{
-			"path" : "C:/OpenGlProject/PolyPaint/out/install/x86-debug"
+			"backtrace" : 2,
+			"id" : "imgui::@7b80154f43a0e16757b5"
 		}
-	},
+	],
+	"id" : "PolyPaint::@8af1e247f0afbf42ebbf",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -131,6 +123,16 @@
 			{
 				"fragment" : "/machine:X86 /debug /INCREMENTAL /subsystem:console",
 				"role" : "flags"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "PolyPaint\\imgui\\imgui.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "PolyPaint\\imgui\\imgui.lib",
+				"role" : "libraries"
 			},
 			{
 				"backtrace" : 3,

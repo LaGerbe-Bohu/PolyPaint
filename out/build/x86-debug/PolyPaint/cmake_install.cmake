@@ -32,7 +32,9 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/PolyPaint/bin" TYPE EXECUTABLE FILES "C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/PolyPaint.exe")
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for each subdirectory.
+  include("C:/OpenGlProject/PolyPaint/out/build/x86-debug/PolyPaint/imgui/cmake_install.cmake")
+
 endif()
 

@@ -10,7 +10,6 @@
 					[
 						1
 					],
-					"hasInstallRule" : true,
 					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
 					"minimumCMakeVersion" : 
 					{
@@ -21,11 +20,14 @@
 				},
 				{
 					"build" : "PolyPaint",
-					"hasInstallRule" : true,
-					"jsonFile" : "directory-PolyPaint-Debug-f5d90d9219d1a601c897.json",
+					"childIndexes" : 
+					[
+						2
+					],
+					"jsonFile" : "directory-PolyPaint-Debug-42f44144f2125bb540bb.json",
 					"minimumCMakeVersion" : 
 					{
-						"string" : "3.8"
+						"string" : "3.6"
 					},
 					"parentIndex" : 0,
 					"projectIndex" : 0,
@@ -33,6 +35,21 @@
 					"targetIndexes" : 
 					[
 						0
+					]
+				},
+				{
+					"build" : "PolyPaint/imgui",
+					"jsonFile" : "directory-PolyPaint.imgui-Debug-b8c773c3ee0e85938506.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "PolyPaint/imgui",
+					"targetIndexes" : 
+					[
+						1
 					]
 				}
 			],
@@ -43,12 +60,14 @@
 					"directoryIndexes" : 
 					[
 						0,
-						1
+						1,
+						2
 					],
 					"name" : "PolyPaint",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -57,8 +76,15 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "PolyPaint::@8af1e247f0afbf42ebbf",
-					"jsonFile" : "target-PolyPaint-Debug-6cb3b3799f4cd1a95cc5.json",
+					"jsonFile" : "target-PolyPaint-Debug-c69b12e09c1c10f262d3.json",
 					"name" : "PolyPaint",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "imgui::@7b80154f43a0e16757b5",
+					"jsonFile" : "target-imgui-Debug-77964222413ba2771f4a.json",
+					"name" : "imgui",
 					"projectIndex" : 0
 				}
 			]
