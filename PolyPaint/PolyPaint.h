@@ -6,6 +6,7 @@
 
 #define GLEW_STATIC
 
+# define M_PI           3.14159265358979323846  /* pi */
 
 
 
@@ -23,9 +24,25 @@
 #include <vector> 
 #include <cstdint>
 #include "GLShader.h"
+#include "Polygone.h"
+#include "SimMath.cpp"
 
 
 
-# define M_PI           3.14159265358979323846  /* pi */
+
+static const float triangle[] = {
+       -1.0f,-1.0f,
+       1.0f,-1.0f,
+       1.0f,1.0f,
+       -1.0f,1.0f,
+};
+
+static const float uv[] = {
+          0.0f,0.0f,
+       1.0f,0.0f,
+       1.0f,1.0f,
+       0.0f,1.0f,
+
+};
 
 // TODO: Reference additional headers your program requires here.
