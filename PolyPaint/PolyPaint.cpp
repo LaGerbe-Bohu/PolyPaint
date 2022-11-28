@@ -20,6 +20,7 @@ bool WindoEdit = false;
 bool Sutherland = true;
 bool selectFill = false;
 bool selectInstanFill = false;
+bool RecFill = false;
 
 std::stack<int*> pile;
 bool fill = false;
@@ -125,16 +126,21 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS )
         {
-           
-            if (selectFill) {
+
+            if (RecFill) {
+                pixelScreens = FillFormConex((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], (int)Screen[0], (int)Screen[1], pixelScreens);
+                loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
+                RecFill = false;
+            }
+            else if (selectFill) {
                 pile.push(new int[2] {(int)mousePos[0], (int)Screen[1] - (int)mousePos[1]});
                 fill = true;
                 selectFill = false;
             }
             else if (selectInstanFill) {
-                pixelScreens = FillFormConex((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], (int)Screen[0], (int)Screen[1], pixelScreens);
+                pixelScreens = FillStack((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], (int)Screen[0], (int)Screen[1], pixelScreens);
                 loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
-                selectFill = false;
+                selectInstanFill = false;
             }
             else if (!Fenetrage && PolyEdit) {
                 
@@ -144,8 +150,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 lstPoints.push_back(mousePos[1]);
 
                
-                
-
             }
             else if(WindoEdit)
             {
@@ -356,7 +360,7 @@ int main(void)
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(Screen[0], Screen[1], "Hello World", NULL, NULL);
+    window = glfwCreateWindow(Screen[0], Screen[1], "PolyPaint", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -565,13 +569,15 @@ int main(void)
         }
       
 
-     
+        
+        ImGui::Text("Pixel Fill");
+        ImGui::Spacing();
 
         if (ImGui::Button("Fill")) {
            
             selectFill = !selectFill;
             selectInstanFill = false;
-              
+            RecFill = false;
         }
 
 
@@ -588,10 +594,47 @@ int main(void)
             selectInstanFill = !selectInstanFill;
 
             selectFill = false;
+            RecFill = false;
             
         }
 
         colors[ImGuiCol_Button] = basicButton;
+        if (RecFill) {
+            colors[ImGuiCol_Button] = ImVec4(0.00f, 1.0, 128.0 / 255.0, 0.5);
+        }
+
+
+        if (ImGui::Button(" RecFill")) {
+
+            RecFill = !RecFill;
+            selectFill = false;
+            selectInstanFill = false;
+        }
+
+
+        colors[ImGuiCol_Button] = basicButton;
+
+
+        ImGui::NewLine();
+        ImGui::Text("Reset Fill");
+        ImGui::Spacing();
+        if (ImGui::Button("Reset Fill")) {
+
+
+
+            for (int i = 0; i < Screen[0]; i++) {
+                for (int j = 0; j < Screen[1]; j++) {
+
+
+                    pixelScreens[((int)Screen[0] * j) + i] = 0.0;
+                   
+
+                }
+            }
+
+            loadTexture(0, pixelScreens, Screen[0], Screen[1]);
+
+        }
 
 
         if (fill && pile.size() > 0) {

@@ -735,18 +735,17 @@ std::vector<float>  GenerateCyrusBeck(std::vector<float>lstPointsFenetre, std::v
     return newPL;
 }
 
-unsigned char data[3];
+
 int gf = 0;
 
-
+unsigned char data[3];
 
 float  getPixelColor(int x, int y,int width,int height,float* lstColor) {
     
     float ypos = height - y;
 
-   
 
-    glReadPixels(x, ypos, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glReadPixels(x, ypos, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &data);
 
     float c= 0.0;
     if (y < height && x < width && x >= 0 && y >=0) {
@@ -777,12 +776,14 @@ float  getPixelColor(int x, int y,int width,int height,float* lstColor) {
         return 1.0;
     }
 
+ 
+
     return 0.0;
 }
 
 float* FillFormConex(float x, float y, int width, int height, float* lstOfColor, float CC = 1.0, float CR = 1.0) {
 
-    if (x >= width  || x < 0 || y >= height  || y < 0 || gf > 50000) {
+    if (x >= width  || x < 0 || y >= height  || y < 0 || gf > 500000) {
         return lstOfColor;
     }
 
@@ -790,9 +791,6 @@ float* FillFormConex(float x, float y, int width, int height, float* lstOfColor,
 
     float CP = getPixelColor(x , y, width, height, lstOfColor);
 
-    float r = (int)data[0];
-
-    CP = r / 255.0;
 
     if ((CP != CC) && (CP != CR)) {
 
@@ -822,7 +820,6 @@ float* FillStackUpdate( int width, int height, float* lstColor, std::stack<int*>
 
         CP = getPixelColor(x, y, width, height, lstColor);
         //  std::cout << "x = " <<x << " y "<< y << std::endl;
-
 
 
         if (CP != CC && CP != CR && y < height && x < width && y >= 0 && x >= 0) {
@@ -870,7 +867,7 @@ float* FillStack(int _x,int _y,int width,int height, float* lstColor,float CC = 
     float CP = 0.0;
     int x = 0;
     int y = 0;
-    while (pile.size() > 0 && pile.size() < 100000 ) {
+    while (pile.size() > 0 && pile.size() < 200000 ) {
          int* v = pile.top();
          x = v[0];
          y = v[1];
