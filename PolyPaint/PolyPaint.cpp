@@ -3,7 +3,7 @@
 
 GLShader g_triangleShader;
 
-float Screen[2]{ 1080*2,720*2 };
+float Screen[2]{ 1080,720 };
 
 double xpos, ypos;
 float* mousePos;
@@ -18,16 +18,73 @@ bool Fenetrage = false;
 bool PolyEdit = true;
 bool WindoEdit = false;
 bool Sutherland = true;
-Polygone poly;
+bool selectFill = false;
+bool selectInstanFill = false;
+
+std::stack<int*> pile;
+bool fill = false;
+Polygone Poly;
+Polygone Wind;
+
+
+std::vector<float> lstofPixel;
+float *pixelScreens;
+
+float** array2D(int n, int m, int val = 0) {
+    float** tab = new float* [n];
+    for (int i = 0; i < n; ++i) {
+        tab[i] = new float[m];
+        for (int j = 0; j < m; ++j)
+            tab[i][j] = val;
+    }
+    return tab;
+}
+
+
+void loadTexture(int f, float* data,float with,float hieght) {
+
+
+
+    unsigned int texId;
+    glGenTextures(1, &texId);
+
+    glActiveTexture(GL_TEXTURE0 + f);
+    glBindTexture(GL_TEXTURE_2D, texId);
+
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+        GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+        GL_NEAREST);
+
+
+    int w, h;
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, with, hieght, 0, GL_RED, GL_FLOAT, data);
+        
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+   
+
+}
+
 
 void Initialize()
 {
 
     lstPoints = std::vector<float>();
     lstPointsFenetre = std::vector<float>();
-    
+    lstofPixel = std::vector<float>();
     mousePos = new float[2];
    
+    Poly = Polygone();
+    Wind = Polygone();
+
     blank.push_back(0);
     blank.push_back(1);
 
@@ -35,12 +92,17 @@ void Initialize()
     g_triangleShader.LoadVertexShader("../../../../PolyPaint/shader.vert");
     g_triangleShader.Create();
 
-   
+
+
+
+
 }
+
+
 
 void Terminate()
 {
-   
+    
 }
 
 void MyLowLevelMouseButtonHandler(int button, bool down)
@@ -63,25 +125,42 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS )
         {
-            MyLowLevelMouseButtonHandler(button, true);
-            if (!Fenetrage && PolyEdit) {
+           
+            if (selectFill) {
+                pile.push(new int[2] {(int)mousePos[0], (int)Screen[1] - (int)mousePos[1]});
+                fill = true;
+                selectFill = false;
+            }
+            else if (selectInstanFill) {
+                pixelScreens = FillFormConex((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], (int)Screen[0], (int)Screen[1], pixelScreens);
+                loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
+                selectFill = false;
+            }
+            else if (!Fenetrage && PolyEdit) {
                 
+                Poly.push_back(mousePos);
+
                 lstPoints.push_back(mousePos[0]);
                 lstPoints.push_back(mousePos[1]);
 
-
+               
+                
 
             }
             else if(WindoEdit)
             {
+               
+                Wind.push_back(mousePos);
+
                 lstPointsFenetre.push_back(mousePos[0]);
                 lstPointsFenetre.push_back(mousePos[1]);
+
+               
             }
 
 
         }
     }
-  
 
 }
 
@@ -96,7 +175,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
  
 }
-
 
 
 void Render(GLFWwindow* window)
@@ -114,11 +192,11 @@ void Render(GLFWwindow* window)
     glfwSetKeyCallback(window, key_callback);
 
 
-
-
-
     auto sh_Triangle = g_triangleShader.GetProgram();
     glUseProgram(sh_Triangle);
+
+
+    
 
     const float aspectRatio = float(width) / float(height);
     const float zNear = 0.1f, zFar = 10000000.0f;
@@ -169,6 +247,8 @@ void Render(GLFWwindow* window)
     glEnableVertexAttribArray(loc_uv);
 
 
+  
+
 
   /*  mousePos[0] = (xpos / Screen[0]);
     mousePos[1] = (1.0f - (ypos / Screen[1]));*/
@@ -195,11 +275,9 @@ void Render(GLFWwindow* window)
     glUniform2fv(loc_resolution, 1, &Screen[0]);
 
 
+    std::vector<float> tempVector = Poly.getFlatVector();
    
-
-    std::vector<float> tempVector = lstPoints;
-
-    if (lstPoints.size() <= 0) {
+    if (tempVector.size() <= 0) {
         tempVector = blank;
     }
 
@@ -207,20 +285,26 @@ void Render(GLFWwindow* window)
         sh_Triangle, "u_points"
     );
 
-    glUniform2fv(loc_points, lstPoints.size(), &tempVector[0]);
-
+    glUniform2fv(loc_points, tempVector.size(), &tempVector[0]);
 
     const auto loc_size_point = glGetUniformLocation(
         sh_Triangle, "u_sizeOfPoints"
     );
 
-    glUniform1i(loc_size_point, int(lstPoints.size() / 2));
+    glUniform1i(loc_size_point, int(tempVector.size() / 2));
     
 
+    const auto loc_size_pixel = glGetUniformLocation(
+        sh_Triangle, "u_sizePixel"
+    );
 
-    tempVector = lstPointsFenetre;
+    glUniform1i(loc_size_pixel, int(lstofPixel.size() / 2));
+   
 
-    if (lstPointsFenetre.size() <= 0) {
+
+    tempVector = Wind.getFlatVector();
+
+    if (tempVector.size() <= 0) {
         tempVector = blank;
     }
 
@@ -231,7 +315,7 @@ void Render(GLFWwindow* window)
     );
 
 
-    glUniform2fv(loc_fenetre, lstPointsFenetre.size(), &tempVector[0]);
+    glUniform2fv(loc_fenetre, tempVector.size(), &tempVector[0]);
 
 
 
@@ -239,136 +323,27 @@ void Render(GLFWwindow* window)
         sh_Triangle, "u_sizeOfFenetre"
     );
 
-    glUniform1i(loc_size_fenetre, int(lstPointsFenetre.size() / 2));
-    
+    glUniform1i(loc_size_fenetre, int(tempVector.size() / 2));
 
+    const auto loc_float_texture = glGetUniformLocation(
+        sh_Triangle, "float_texture"
+    );
 
- 
+    glUniform1i(loc_float_texture,0);
+   
+
 
     glDrawArrays(GL_QUADS, 0, 4);
 }
 
 
-
 void SwitchEdit() {
+
     PolyEdit = !PolyEdit;
     WindoEdit = !WindoEdit;
 }
 
-void GenerateCyrusBeck() {
-    std::vector<float> newPL;
-    std::vector<float> tmpPL = std::vector<float>(lstPoints);
-    float* S = new float[2] {tmpPL[0], tmpPL[1]};
-    std::vector<float*> criticalSeg;
 
-    float* der = new float[2] {lstPointsFenetre[lstPointsFenetre.size() - 2], lstPointsFenetre[lstPointsFenetre.size() - 1]};
-
-    for (int k = 0; k <= lstPointsFenetre.size() - 2; k += 2) {
-
-        bool b = isInside(new float[2] {lstPointsFenetre[k], lstPointsFenetre[k + 1]}, lstPoints);
-
-        if (b) {
-
-            int c = k - 2;
-            if (c < 0) c = lstPointsFenetre.size() - 2;
-            int idx = (k + 2) % lstPointsFenetre.size();
-            criticalSeg.push_back(new float[4] {lstPointsFenetre[k], lstPointsFenetre[k + 1], lstPointsFenetre[idx], lstPointsFenetre[idx + 1]});
-            criticalSeg.push_back(new float[4] {lstPointsFenetre[k], lstPointsFenetre[k + 1], lstPointsFenetre[c], lstPointsFenetre[c + 1]});
-
-
-        }
-
-    }
-    //  std::cout << "number of size : "<< criticalSeg.size() << std::endl;
-    tmpPL.push_back(S[0]);
-    tmpPL.push_back(S[1]);
-
-    float* B;
-    float* A;
-    for (int i = 2; i <= tmpPL.size() - 2; i += 2) {
-
-
-        B = new float[2] {tmpPL[i], tmpPL[i + 1]};
-        if (CyrusBeck(S, B, lstPointsFenetre)) {
-            newPL.push_back(S[0]);
-            newPL.push_back(S[1]);
-            newPL.push_back(B[0]);
-            newPL.push_back(B[1]);
-        }
-
-
-        S = new float[2] {tmpPL[i], tmpPL[i + 1]};
-    }
-
-
-
-
-    if (criticalSeg.size() > 0) {
-
-
-
-        tmpPL = newPL;
-        newPL = std::vector<float>();
-
-        int c = tmpPL.size();
-        if (tmpPL.size() == 0 && (criticalSeg.size()) == lstPointsFenetre.size())
-        {
-            tmpPL = lstPointsFenetre;
-        }
-
-        for (int i = 2; i < tmpPL.size() + 1; i += 2) {
-
-            if (criticalSeg.size() <= 0) {
-                break;
-            }
-
-
-
-            int k = isInterseptCriticalSegment(new float[2] {tmpPL[i], tmpPL[i + 1]}, criticalSeg);
-            int j = (i) % tmpPL.size();
-            if (k < 0) {
-
-            }
-            else {
-
-                int idx = (j + 2) % tmpPL.size();
-
-
-
-                int m = isInterseptCriticalSegment(new float[2] {tmpPL[idx], tmpPL[(idx + 1)]}, criticalSeg);
-
-                if ((k != m) || (k == m && idx == 0))
-                {
-
-                    if (!containPoint(new float[2] {criticalSeg[k][0], criticalSeg[k][1]}, tmpPL)) {
-                        tmpPL.push_back(criticalSeg[k][0]);
-                        tmpPL.push_back(criticalSeg[k][1]);
-                        criticalSeg.erase(criticalSeg.begin() + k);
-                        criticalSeg.erase(criticalSeg.begin() + k);
-
-                    }
-
-
-
-
-                }
-
-
-            }
-
-        }
-
-
-
-        newPL = tmpPL;
-    }
-
-
-    //std::cout << "ici" <<  newPL.size() << std::endl;
-
-
-    lstPoints = newPL;
-}
 
 
 
@@ -407,109 +382,254 @@ int main(void)
     colors[ImGuiCol_TitleBgActive] = ImVec4(0.64f, 0.68f, 0.82f, 1.00f);
     colors[ImGuiCol_TitleBg] = ImVec4(0.64f, 0.68f, 0.82f, 1.00f);
     ImGui::GetStyle().WindowRounding = 9.0f;
-
-
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
+    pixelScreens = new float[Screen[0] * Screen[1]];
+
     Initialize();
+
+   
+
+    for (int i = 0; i < Screen[0]; i++) {
+        for (int j = 0; j < Screen[1]; j++) {
+
+
+            pixelScreens[( (int)Screen[0] * j) + i] = 0.0;
+
+            
+        }
+    }
+
+  
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+       
+    
+
         glfwSetMouseButtonCallback(window, mouse_button_callback);
         /* Poll for and process events */
         glfwPollEvents();
 
+      //  std::cout << mousePos[0] << " " << mousePos[1] << std::endl;
+
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+   
+
+
+   /*     ImGui::ShowDemoWindow();
+       
+       ;*/
+       // ImGui::ShowStyleEditor();
+
+        ImGui::SetNextWindowPos(ImVec2(30.0, 30.0));
 
         ImGui::Begin("PolyPaint Point Handler");
         ImGui::Text("PolyPaint Manager");
         ImGui::Spacing();
        
         ImGui::Text("PolyGone Manager");
+
+        ImVec4* colors = ImGui::GetStyle().Colors;
+        ImVec4 basicButton = colors[ImGuiCol_Button];
+
+      
+        colors[ImGuiCol_Button] = basicButton;
         if (!PolyEdit) {
-            if (ImGui::Button("Add point to the polygone")) {
+           
+            if (ImGui::Button("Add point to the polygone") && !selectFill) {
                 SwitchEdit();
             }
                 
         }
         else {
-            if (ImGui::Button("Stop adding point to the polygone"))
+            colors[ImGuiCol_Button] = ImVec4(0.00f, 1.0, 128.0 / 255.0, 0.5);
+            if (ImGui::Button("Stop adding point to the polygone") )
             {
                 SwitchEdit();
             }
                
         }
 
+        
+        ImGui::Spacing();
+        colors[ImGuiCol_Button] = ImVec4(0.00f, 1.0, 128.0 / 255.0, 0.5);
+        if (Poly.getPoints().size() > 0 && ImGui::Button("Reset Pollygone")) {
+         
+            Poly.setPoints(std::vector<float*>());
+
+        }
+        colors[ImGuiCol_Button] = basicButton;
+
+     
+
         ImGui::Spacing();
         ImGui::Text("Window Manager");
+  
+        colors[ImGuiCol_Button] = basicButton;
         if (!WindoEdit) {
+          
             if (ImGui::Button("Add point to the Windo")) {
                 SwitchEdit();
             }
-               
+      
+           
+
+
         }
         else {
+            colors[ImGuiCol_Button] = ImVec4(144.0 / 255.0, 18.0 / 255.0, 208.0 / 255.0, .5);
+           
             if (ImGui::Button("Stop adding point to the Windo")) {
                 SwitchEdit();
             }
                
         }
 
+        ImGui::Spacing();
+        colors[ImGuiCol_Button] = ImVec4(144.0 / 255.0, 18.0 / 255.0, 208.0 / 255.0, .5);
+        if (Wind.getPoints().size() > 0 && ImGui::Button("Remove")) {
+
+            Wind.setPoints(std::vector<float*>());
+        }
+
+
+
+
+        colors[ImGuiCol_Button] = basicButton;
+
         ImGui::NewLine();
         ImGui::Spacing();
         
-        ImGui::Text("Clip polygone");
-        if (ImGui::Button("Clip Sutherland")) {
-            lstPointsFenetre.push_back(lstPointsFenetre[0]);
-            lstPointsFenetre.push_back(lstPointsFenetre[1]);
-            lstPoints = SutherLandHodman(lstPoints, lstPointsFenetre);
-           
-        }
-        ImGui::Spacing();
-
-        if (ImGui::Button("Clip Cyrus Beck")) {
-            GenerateCyrusBeck();
-        }
-
-        
-        ImGui::Spacing();
-        if (ImGui::Button("Reset Point")) {
-            lstPoints = std::vector<float>();
-            lstPointsFenetre = std::vector<float>();
-        }
-   
-        ImGui::NewLine();
-        ImGui::Text("Window");
-        ImGui::Spacing();
-        if (ImGui::Button("Remove")) {
-          
-            lstPointsFenetre = std::vector<float>();
-        }
+        if (Wind.getPoints().size() >= 3 && Poly.getPoints().size() >= 3) {
 
        
-        ImGui::SetWindowSize(ImVec2(300, 500));
+
+            ImGui::Text("Clip polygone");
+            if ( ImGui::Button("Clip Sutherland")) {
+               // lstPointsFenetre.push_back(lstPointsFenetre[0]);
+                //lstPointsFenetre.push_back(lstPointsFenetre[1]);
+            
+               // lstPoints = SutherLandHodman(lstPoints, lstPointsFenetre);
+                Wind.push_back(Wind[0]);
+                Poly = SutherLandHodman(Poly,Wind);
+            }
+            ImGui::Spacing();
+
+            if (ImGui::Button("Clip Cyrus Beck") ) {
+       
+           
+                std::vector<float> d = GenerateCyrusBeck(Wind.getFlatVector(),Poly.getFlatVector() );
+                std::vector<float*> tmp;
+
+                for (int i = 0; i <= d.size()-2; i+=2) {
+                    tmp.push_back(new float[2] {d[i],d[i+1]});
+                }
+
+                Poly.setPoints(tmp);
+
+
+            }
+        }
+        
+      
+   
+          
+ 
+        ImGui::SetWindowSize(ImVec2(300, 250));
      
+
+
         ImGui::End();
 
-
-        /* Render here */
+       
+        ImGui::SetNextWindowPos(ImVec2(30.0,(250+30)+30));
      
+
+        ImGui::Begin("Remplissage");
+
+
+  
+
+        ImGui::Spacing();
+
+
+        colors[ImGuiCol_Button] = basicButton;
+        if (selectFill) {
+            colors[ImGuiCol_Button] = ImVec4(214 / 255.0, 34 / 255.0, 61 / 255.0, 1);
+        }
       
 
      
 
+        if (ImGui::Button("Fill")) {
+           
+            selectFill = !selectFill;
+            selectInstanFill = false;
+              
+        }
+
+
+        
+     
+        colors[ImGuiCol_Button] = basicButton;
+        if (selectInstanFill) {
+            colors[ImGuiCol_Button] = ImVec4(219 / 255.0, 202 / 255.0, 46 / 255.0, .7);
+        }
+
+
+        if (ImGui::Button(" InstantFill")) {
+
+            selectInstanFill = !selectInstanFill;
+
+            selectFill = false;
+            
+        }
+
+        colors[ImGuiCol_Button] = basicButton;
+
+
+        if (fill && pile.size() > 0) {
+           
+            pixelScreens = FillStackUpdate((int)Screen[0], (int)Screen[1], pixelScreens, pile);
+         //   std::cout << getPixelColor(600, 600, Screen[0], Screen[1], pixelScreens) << std::endl;
+            
+            if (pile.size() % 10 == 0) {
+                loadTexture(0, pixelScreens, Screen[0], Screen[1]);
+            }
+           
+        
+        }
+       
+      
+
+
+        ImGui::SetWindowSize(ImVec2(300, 150));
+        ImGui::End();
+
+        ImGui::SetNextWindowPos(ImVec2(30.0, ( (400) + 90 )));
+
+
+        ImGui::ShowDebugLogWindow(new bool[1]{true});
+
+        /* Render here */
         ImGui::Render();
         Render(window);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+        
+
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
       
-      
+        
+     
+
     }
 
     ImGui_ImplOpenGL3_Shutdown();

@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(PolyPaint)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 set(APP_VERSION_MAJOR 1)
@@ -13,7 +13,7 @@ set(APP_VERSION_MINOR 0)
 
 add_subdirectory(imgui)
 include_directories(${PROJECT_SOURCE_DIR})
-add_executable (PolyPaint "PolyPaint.cpp"  "PolyPaint.h"  "GLShader.cpp")
+add_executable (PolyPaint "PolyPaint.cpp"  "PolyPaint.h"  "GLShader.cpp" "coroutine.cpp")
 
 target_link_libraries(PolyPaint imgui)
 

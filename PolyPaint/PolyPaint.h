@@ -22,12 +22,14 @@
 #include <iostream>
 #include <cmath>
 #include <vector> 
+#include<stack>
 #include <cstdint>
 #include "GLShader.h"
-#include "Polygone.h"
+
+
 #include "SimMath.cpp"
-
-
+#include "CustomUi.cpp"
+#include <future>
 
 
 static const float triangle[] = {
@@ -46,3 +48,5 @@ static const float uv[] = {
 };
 
 // TODO: Reference additional headers your program requires here.
+
+void Initialize();

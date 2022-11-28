@@ -12,8 +12,9 @@ attribute mat4 a_projectionMatrix;
 
 varying vec2 v_uv;
 varying vec3 v_position;
+varying float float_texel;
 
-
+uniform sampler2D float_texture;
 
 vec2 mousePos;
 
@@ -30,6 +31,9 @@ void main(void){
     v_position = vec3(position.x,position.y,position.z);
     v_uv = a_uv;
 
+   //float_texel = float( texture2D(float_texture, vec2(position.x,position.y)));
+
+ 
     gl_Position = position;
 
 }
