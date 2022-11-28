@@ -3,7 +3,7 @@
 
 GLShader g_triangleShader;
 
-float Screen[2]{ 1080,720 };
+float Screen[2]{ 1080*2,720*2 };
 
 double xpos, ypos;
 float* mousePos;
@@ -86,8 +86,8 @@ void Initialize()
     Poly = Polygone();
     Wind = Polygone();
 
-    blank.push_back(0);
-    blank.push_back(1);
+    blank.push_back(-10);
+    blank.push_back(-10);
 
     g_triangleShader.LoadFragmentShader("../../../../PolyPaint/shader.frag");
     g_triangleShader.LoadVertexShader("../../../../PolyPaint/shader.vert");
