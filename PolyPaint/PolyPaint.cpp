@@ -3,7 +3,7 @@
 
 GLShader g_triangleShader;
 
-float Screen[2]{ 1080*2,720*2 };
+float Screen[2]{ 1080,720 };
 
 double xpos, ypos;
 float* mousePos;
@@ -18,9 +18,18 @@ bool Fenetrage = false;
 bool PolyEdit = true;
 bool WindoEdit = false;
 bool Sutherland = true;
-bool selectFill = false;
-bool selectInstanFill = false;
-bool RecFill = false;
+
+enum Input
+{
+    FillCCitUpdate,
+    FillCCit,
+    FillCCRec,
+    FillCCLine,
+    FIllCCPoly,
+    AddPoly
+}; 
+
+Input ClickInput;
 
 std::stack<int*> pile;
 bool fill = false;
@@ -83,6 +92,8 @@ void Initialize()
     lstofPixel = std::vector<float>();
     mousePos = new float[2];
    
+    ClickInput = AddPoly;
+
     Poly = Polygone();
     Wind = Polygone();
 
@@ -126,43 +137,49 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS )
         {
-
-            if (RecFill) {
-                pixelScreens = FillFormConex((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], (int)Screen[0], (int)Screen[1], pixelScreens);
-                loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
-                RecFill = false;
-            }
-            else if (selectFill) {
-                pile.push(new int[2] {(int)mousePos[0], (int)Screen[1] - (int)mousePos[1]});
-                fill = true;
-                selectFill = false;
-            }
-            else if (selectInstanFill) {
-                pixelScreens = FillStack((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], (int)Screen[0], (int)Screen[1], pixelScreens);
-                loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
-                selectInstanFill = false;
-            }
-            else if (!Fenetrage && PolyEdit) {
-                
-                Poly.push_back(mousePos);
-
-                lstPoints.push_back(mousePos[0]);
-                lstPoints.push_back(mousePos[1]);
-
-               
-            }
-            else if(WindoEdit)
+            switch (ClickInput)
             {
-               
-                Wind.push_back(mousePos);
 
-                lstPointsFenetre.push_back(mousePos[0]);
-                lstPointsFenetre.push_back(mousePos[1]);
 
-               
+                case FillCCitUpdate:
+                    pile.push(new int[2] {(int)mousePos[0], (int)Screen[1] - (int)mousePos[1]});
+                    fill = true;
+                    ClickInput = AddPoly;
+                break;
+
+                case FillCCRec:
+                    pixelScreens = FillFormConex((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], Screen[0], Screen[1], pixelScreens);
+                    loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
+                    ClickInput = AddPoly;
+                break;
+
+                case FillCCLine:
+                    pixelScreens = LineFill((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], Screen[0], Screen[1], pixelScreens);
+                    loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
+                    ClickInput = AddPoly;
+                break;
+
+                case FillCCit:
+                    pixelScreens = FillStack((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], (int)Screen[0], (int)Screen[1], pixelScreens);
+                    loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
+                    ClickInput = AddPoly;
+
+                case AddPoly:
+
+                    if (!Fenetrage && PolyEdit) {
+                        Poly.push_back(mousePos);
+                        lstPoints.push_back(mousePos[0]);
+                        lstPoints.push_back(mousePos[1]);
+                    }
+                    else if (WindoEdit)
+                    {
+                        Wind.push_back(mousePos);
+                        lstPointsFenetre.push_back(mousePos[0]);
+                        lstPointsFenetre.push_back(mousePos[1]);
+                    }
+                    ClickInput = AddPoly;
+                break;
             }
-
-
         }
     }
 
@@ -446,7 +463,7 @@ int main(void)
         colors[ImGuiCol_Button] = basicButton;
         if (!PolyEdit) {
            
-            if (ImGui::Button("Add point to the polygone") && !selectFill) {
+            if (ImGui::Button("Add point to the polygone")) {
                 SwitchEdit();
             }
                 
@@ -531,11 +548,15 @@ int main(void)
                 std::vector<float> d = GenerateCyrusBeck(Wind.getFlatVector(),Poly.getFlatVector() );
                 std::vector<float*> tmp;
 
-                for (int i = 0; i <= d.size()-2; i+=2) {
-                    tmp.push_back(new float[2] {d[i],d[i+1]});
+                if (d.size() > 0) {
+                    for (int i = 0; i <= d.size() - 2; i += 2) {
+                        tmp.push_back(new float[2] {d[i], d[i + 1]});
+                    }
+
+                    Poly.setPoints(tmp);
                 }
 
-                Poly.setPoints(tmp);
+             
 
 
             }
@@ -564,7 +585,8 @@ int main(void)
 
 
         colors[ImGuiCol_Button] = basicButton;
-        if (selectFill) {
+     
+        if (ClickInput == FillCCitUpdate) {
             colors[ImGuiCol_Button] = ImVec4(214 / 255.0, 34 / 255.0, 61 / 255.0, 1);
         }
       
@@ -575,41 +597,122 @@ int main(void)
 
         if (ImGui::Button("Fill")) {
            
-            selectFill = !selectFill;
-            selectInstanFill = false;
-            RecFill = false;
+            if (ClickInput == FillCCitUpdate) {
+                ClickInput = AddPoly;
+            }
+            else {
+                ClickInput = FillCCitUpdate;
+            }
+            
+           
         }
 
 
-        
+        ImGui::SameLine();
      
         colors[ImGuiCol_Button] = basicButton;
-        if (selectInstanFill) {
+        if (ClickInput == FillCCit) {
             colors[ImGuiCol_Button] = ImVec4(219 / 255.0, 202 / 255.0, 46 / 255.0, .7);
         }
 
 
-        if (ImGui::Button(" InstantFill")) {
+        if (ImGui::Button(" Interat Fill")) {
 
-            selectInstanFill = !selectInstanFill;
+            if (ClickInput == FillCCit) {
+                ClickInput = AddPoly;
+            }
+            else {
+                ClickInput = FillCCit;
+            }
 
-            selectFill = false;
-            RecFill = false;
+            
             
         }
 
         colors[ImGuiCol_Button] = basicButton;
-        if (RecFill) {
+        if (ClickInput == FillCCRec) {
             colors[ImGuiCol_Button] = ImVec4(0.00f, 1.0, 128.0 / 255.0, 0.5);
         }
 
+   
 
         if (ImGui::Button(" RecFill")) {
 
-            RecFill = !RecFill;
-            selectFill = false;
-            selectInstanFill = false;
+            if (ClickInput == FillCCRec) {
+                ClickInput = AddPoly;
+            }
+            else {
+                ClickInput = FillCCRec;
+            }
+
+            
         }
+
+        ImGui::SameLine();
+
+        colors[ImGuiCol_Button] = basicButton;
+        if (ClickInput == FillCCLine) {
+            colors[ImGuiCol_Button] = ImVec4(219 / 255.0, 202 / 255.0, 46 / 255.0, .7);
+        }
+
+          ImGui::SameLine();
+        if (ImGui::Button("Fill Line")) {
+
+            if (ClickInput == FillCCLine) {
+                ClickInput = AddPoly;
+            }
+            else {
+                ClickInput = FillCCLine;
+            }
+
+
+
+        }
+
+        colors[ImGuiCol_Button] = basicButton;
+
+
+
+        ImGui::NewLine();
+        ImGui::Text("Poly Fill");
+        ImGui::Spacing();
+        
+       
+        colors[ImGuiCol_Button] = ImVec4(0.00f, 1.0, 128.0 / 255.0, 0.5);
+        if (ImGui::Button("Fill Rect")) {
+
+            int xmin = Screen[0];
+            int ymin = Screen[1];
+            
+            int xmax = -Screen[0];
+            int ymax = -Screen[1];
+
+            for (int i = 0; i < Poly.getPoints().size(); i++)
+            {
+                if (Poly[i][0] < xmin) {
+                    xmin = Poly[i][0];
+                }
+
+                if (Poly[i][0] > xmax) {
+                    xmax = Poly[i][0];
+                }
+
+                if (Poly[i][1] > ymax) {
+                    ymax = Poly[i][1];
+                }
+
+                if (Poly[i][1] < ymin) {
+                    ymin = Poly[i][1];
+                }
+
+            }
+
+
+            pixelScreens = fillRect(Poly, new int[2] {xmin, ymin}, new int[2] {xmax, ymax}, pixelScreens, Screen[0], Screen[1]);
+            loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
+          
+        }
+
 
 
         colors[ImGuiCol_Button] = basicButton;
@@ -642,7 +745,7 @@ int main(void)
             pixelScreens = FillStackUpdate((int)Screen[0], (int)Screen[1], pixelScreens, pile);
          //   std::cout << getPixelColor(600, 600, Screen[0], Screen[1], pixelScreens) << std::endl;
             
-            if (pile.size() % 10 == 0) {
+            if (pile.size() % 100 == 0) {
                 loadTexture(0, pixelScreens, Screen[0], Screen[1]);
             }
            

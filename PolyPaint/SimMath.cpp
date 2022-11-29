@@ -78,7 +78,7 @@ float* intersection(float* currentPoint, float* nextPoint, float* f1, float* f2,
         (float)(nextPoint[0] - currentPoint[0]), (float)(f1[0] - f2[0]),
             (float)(nextPoint[1] - currentPoint[1]), (float)(f1[1] - f2[1]),
     };
-
+        
 
     float* b = new float[2] {
         (float)f1[0] - currentPoint[0],
@@ -185,12 +185,13 @@ bool isVisible(float* Point, float* c, float* d, bool orientation)
 
 bool isClockWise(std::vector<float>lst) {
     double sum = 0.0;
-    float* S;
+    float S[2];
     float* F;
 
 
 
-    S = new float[2] {lst[0], lst[1]};
+    S[0] = lst[0];
+    S[1] = lst[1];
 
     for (int i = 2; i <= lst.size() - 1; i += 2) {
 
@@ -200,7 +201,8 @@ bool isClockWise(std::vector<float>lst) {
 
         // std::cout <<  "(" << lst[i]<<"-" << S[0]<<")("<<lst[i+1]<<"+" <<S[1]<<") ="<< sum << std::endl;
 
-        S = new float[2] {lst[i], lst[idx]};
+        S[0] = lst[i]; 
+        S[1] = lst[idx];
     }
 
     //  std::cout << (sum <0) << std::endl;
@@ -245,20 +247,33 @@ bool CW3PTS(float* A, float* B, float* C) {
     return (v < 0);
 }
 
-bool isInside(float* point, std::vector<float> poly) {
+bool isInside(float point[2], std::vector<float> poly) {
 
     double sum = 0;
 
     bool clockWise = isClockWise(poly);
 
+    float A[2];
+    float B[2];
+
+    float tmp[2];
+    float tmp2[2];
+
 
     for (int i = 0; i <= poly.size() - 2; i += 2) {
-        float* A = new float[2] { poly[i] - point[0], poly[i + 1] - point[1] };
+        A[0] = poly[i] - point[0];
+        A[1] = poly[i + 1] - point[1];
         int idx = (i + 2) % poly.size();
-        float* B = new float[2] {poly[idx] - point[0], poly[idx + 1] - point[1]};
+        B[0] = poly[idx] - point[0];
+        B[1] = poly[idx + 1] - point[1];
 
+        tmp[0] = poly[i];
+        tmp[1] = poly[i + 1];
 
-        bool b = CW3PTS(new float[2] {poly[i], poly[i + 1] }, point, new float[2] {poly[idx], poly[idx + 1] });
+        tmp2[0] = poly[idx];
+        tmp2[1] = poly[idx + 1];
+
+        bool b = CW3PTS(tmp, point, tmp2);
 
         double v = (A[0] * B[0] + A[1] * B[1]);
         double s = (acosf(v / ((norme(A) * norme(B)))) * (180 / M_PI));
@@ -288,7 +303,6 @@ int isInterseptCriticalSegment(float* point, PolySeg poly) {
         if (isContainOnline(poly[i].Seg1.A, point, poly[i].Seg1.B) || isContainOnline(poly[i].Seg2.A, point, poly[i].Seg2.B)) {
             return i;
         }
-
     }
 
     return -1;
@@ -369,77 +383,6 @@ std::vector<float*> SutherLandHodman(Polygone Cpolly, Polygone Window) {
     return PS.getPoints();
 }
 
-std::vector<float> SutherLandHodman(std::vector<float> PL, std::vector<float> PW) {
-    int i, j;
-    int N1 = PL.size();
-    int N2 = 0;
-    int N3 = PW.size();
-    float* S;
-    float* F;
-    float* I;
-    std::vector<float> PS;
-
-    bool Orientation = isClockWise(PW);
-
-    for (i = 0; i < N3 - 2; i += 2) {
-        N2 = 0;
-        PS = std::vector<float>();
-        float* Fi = new float[2] {PW[i], PW[i + 1]};
-        float* Fi1 = new float[2] {PW[i + 2], PW[i + 3]};
-
-        for (j = 0; j < N1; j += 2) {
-
-            float* Pj = new float[2] {PL[j], PL[j + 1]};
-
-            if (j == 0) {
-                F = Pj;
-            }
-            else {
-
-                if (i + 3 > N3) {
-                    std::cout << "ERREUR i+3 > N3 191 >" << i + 3 << ">" << N3 << std::endl;
-                }
-
-                if (coupe(S, Pj, Fi, Fi1)) {
-                    I = intersection(S, Pj, Fi, Fi1);
-                    PS.push_back(I[0]);
-                    PS.push_back(I[1]);
-                    N2 += 2;
-                }
-            }
-            S = Pj;
-            if (isVisible(S, Fi, Fi1, Orientation)) {
-                // std::cout << j << std::endl;
-                PS.push_back(S[0]);
-                PS.push_back(S[1]);
-                N2 += 2;
-            }
-        }
-        if (N2 > 0) {
-
-            if (coupe(S, F, Fi, Fi1)) {
-                // std::cout << "je passe je crois" << std::endl;
-                I = intersection(S, F, Fi, Fi1);
-
-
-
-                if (I[0] - F[0] < 0.01 && I[1] - F[1] < .01) {
-                    // std::cout << "same point" << std::endl;
-                }
-
-                PS.push_back(I[0]);
-                PS.push_back(I[1]);
-                N2 += 2;
-            }
-            PL = PS;
-            N1 = N2;
-
-        }
-
-    }
-    return PS;
-}
-
 bool CyrusBeck(float* A, float* B, std::vector<float> PW) {
 
     std::vector<float*> normal;
@@ -459,7 +402,7 @@ bool CyrusBeck(float* A, float* B, std::vector<float> PW) {
         int idx = (i + 1) % _PW.size();
 
 
-        if (true) {
+        if (b) {
 
 
 
@@ -548,83 +491,6 @@ bool CyrusBeck(float* A, float* B, std::vector<float> PW) {
 
     return false;
 }
-
-
-Polygone GenerateCyrusBeck(Polygone cPoly,Polygone Wind) {
-    Polygone newPL;
-    Polygone tmpPL;
-    tmpPL.setPoints(cPoly.getPoints());
-    float* S = tmpPL[0];
-    tmpPL.push_back(S);
-    Polygone criticalSeg;
-    float* B;
-
-    PolySeg seg;
-    seg.InitializePolySeg(Wind,cPoly);
-
-
-    for (int i = 1; i < tmpPL.getPoints().size(); i ++) {
-
-
-        B = new float[2] { tmpPL[i][0], tmpPL[i][1]};
-        if (CyrusBeck(S, B, Wind.getFlatVector())) {
-            newPL.push_back(S);
-            newPL.push_back(B);
-        }
-
-
-        S = new float[2] { tmpPL[i][0], tmpPL[i][1]};
-    }
-    tmpPL = Polygone();
-
-    if (seg.GetSegments().size() > 0 ) {
-
-        for (int i = 0; i < newPL.getPoints().size(); i++) {
-            
-            int k = isInterseptCriticalSegment(newPL[i],seg);
-            bool insert = false;
-            if (k > 0) {
-                int idx = (i + 1) % newPL.getPoints().size();
-                bool trouver = false;
-                int m = -1;
-                while (idx < newPL.getPoints().size() && !trouver) {
-
-                    m = isInterseptCriticalSegment(newPL[idx], seg);
-
-                    if (m >= 0) {
-                        trouver = true;
-                    }
-                    else {
-                        idx++;
-                    }
-                }
-
-                if (trouver && k != m) {
-                    tmpPL.push_back(newPL[i]);
-                    tmpPL.push_back(seg[k].Point);
-                    //seg.GetSegments().erase(seg.GetSegments().begin() + k);
-                    insert = true;
-                }
-
-
-            }
-
-            if (!insert) {
-                tmpPL.push_back(newPL[i]);
-            }
-
-        }
-
-        newPL = tmpPL;
-
-    }
-
-
-
-
-    return newPL;
-}
-
 
 std::vector<float>  GenerateCyrusBeck(std::vector<float>lstPointsFenetre, std::vector<float>lstPoints) {
     std::vector<float> newPL;
@@ -728,13 +594,13 @@ std::vector<float>  GenerateCyrusBeck(std::vector<float>lstPointsFenetre, std::v
     }
 
 
-    //std::cout << "ici" <<  newPL.size() << std::endl;
-
-
-
     return newPL;
 }
 
+
+
+
+//  REMPLISSAGE ==================================
 
 int gf = 0;
 
@@ -801,7 +667,10 @@ float* FillFormConex(float x, float y, int width, int height, float* lstOfColor,
         FillFormConex(x - 1, y, width, height, lstOfColor, CC, CR);
         FillFormConex(x + 1, y, width, height, lstOfColor, CC, CR);
 
+        
     }
+
+  
 
     return lstOfColor;
 }
@@ -912,5 +781,150 @@ float* FillStack(int _x,int _y,int width,int height, float* lstColor,float CC = 
 
 
     }
+    return lstColor;
+}
+
+
+float* fillRect(Polygone poly,int* min,int* max,float* lstofPixel,int width,int height) {
+    
+    int xmin = min[0];
+    int ymin = min[1];
+
+    int xmax = max[0];
+    int ymax = max[1];
+    std::vector<float> vec = poly.getFlatVector();
+    for (int x = xmin; x < xmax; x++) {
+
+        for (int y = ymin; y < ymax; y++) {
+            if (isInside(new float[2] {(float)x,(float)y},vec)) {
+                int ypos = height - y;
+                lstofPixel[(ypos * width) + x] = 1.0;
+            }
+        }
+    }
+
+    return lstofPixel;
+}
+
+
+float* DrawLine(int xA, int yA, int  xB, int yB, float* lstColor,int width) {
+    int dx = xB - xA;
+    int dy = yB - yA;
+
+    int adx = abs(dx);
+    int ady = abs(dy);
+    
+    if (adx <= 0) {
+        adx = 1;
+    }
+
+    if (ady <= 0) {
+        ady = 1;
+    }
+
+
+    if (adx > ady) {
+        for (int i = 0; i < adx; i++) {
+            int  x = xA + (int)((dx * i) / adx);
+            int  y = yA + (int)((dy * i) / ady);
+            lstColor[(width * y) + x] = 1.0;
+        }
+    }
+    else {
+        for (int i = 0; i < ady; i++) {
+            int  x = xA + (int)((dy * i) / adx);
+            int  y = yA + (int)((dx * i) / ady);
+            lstColor[(width * y) + x] = 1.0;
+        }
+    }
+
+
+    return lstColor;
+}
+
+float* LineFill(int _x,int _y,int width,int height,float* lstColor,float CC = 1.0,float CR = 1.0) {
+    float CP;
+    float CPd;
+    float CPg;
+    std::stack<int*> pile;
+    int xd;
+    int xg;
+    int x;
+    int y;
+    pile.push(new int[2]{_x,_y});
+   
+    
+    while (pile.size() > 0) {
+        int* v = pile.top();
+        x = v[0];
+        y = v[1];
+        pile.pop();
+
+        CP = getPixelColor(x, y, width, height, lstColor);
+
+        xd = x+1;
+        CPd = CP;
+
+        while (CPd != 1.0) {
+            xd+=1;
+            CPd = getPixelColor(xd, y, width, height, lstColor);
+        }
+
+        xd = xd - 1;
+        xg = x-1;
+        CPg = CP;
+
+        while (CPg != 1.0) {
+            xg -= 1;
+            CPg = getPixelColor(xg, y, width, height, lstColor);
+        }
+        xg = xg + 1;
+
+        lstColor = DrawLine(xg, y, xd, y, lstColor, width);
+
+        while (x >= xg) {
+            while ((CP == CC) || (CP == CR) && (x >= xg)) {
+                x = x - 1;
+                CP = getPixelColor(x, y+1, width, height, lstColor);
+            }
+
+            if (x >= xg && (CP != CC) && (CP != CR)) {
+                pile.push(new int[2] {x, y + 1});
+              
+            }
+
+            while ((CP != CC) && (x >= xg)) {
+                x = x - 1;
+                CP = getPixelColor(x, y + 1, width, height, lstColor);
+                
+            }
+
+        }
+
+        x = xd;
+        CP = getPixelColor(x, y-1, width, height, lstColor);
+
+        while (x >= xg) {
+            while ((CP == CC) || (CP == CR) && (x >= xg)) {
+                x = x - 1;
+                CP = getPixelColor(x, y - 1, width, height, lstColor);
+            }
+
+            if (x >= xg && (CP != CC) && (CP != CR)) {
+                pile.push(new int[2] {x, y - 1});
+
+            }
+
+            while ((CP != CC) && (x >= xg)) {
+                x = x - 1;
+                CP = getPixelColor(x, y - 1, width, height, lstColor);
+
+            }
+
+        }
+
+
+    }
+
     return lstColor;
 }
