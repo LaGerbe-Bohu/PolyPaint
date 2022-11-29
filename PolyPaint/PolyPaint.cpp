@@ -163,7 +163,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                     pixelScreens = FillStack((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], (int)Screen[0], (int)Screen[1], pixelScreens);
                     loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
                     ClickInput = AddPoly;
-
+                break;
                 case AddPoly:
 
                     if (!Fenetrage && PolyEdit) {
@@ -366,7 +366,7 @@ void SwitchEdit() {
 
 
 
-
+int it = 0;
 
 int main(void)
 {
@@ -544,9 +544,13 @@ int main(void)
 
             if (ImGui::Button("Clip Cyrus Beck") ) {
        
-           
+
+
+               
                 std::vector<float> d = GenerateCyrusBeck(Wind.getFlatVector(),Poly.getFlatVector() );
                 std::vector<float*> tmp;
+
+               
 
                 if (d.size() > 0) {
                     for (int i = 0; i <= d.size() - 2; i += 2) {
@@ -586,7 +590,7 @@ int main(void)
 
         colors[ImGuiCol_Button] = basicButton;
      
-        if (ClickInput == FillCCitUpdate) {
+        if (ClickInput == FillCCitUpdate || fill) {
             colors[ImGuiCol_Button] = ImVec4(214 / 255.0, 34 / 255.0, 61 / 255.0, 1);
         }
       
@@ -634,7 +638,7 @@ int main(void)
             colors[ImGuiCol_Button] = ImVec4(0.00f, 1.0, 128.0 / 255.0, 0.5);
         }
 
-   
+    
 
         if (ImGui::Button(" RecFill")) {
 
@@ -655,7 +659,8 @@ int main(void)
             colors[ImGuiCol_Button] = ImVec4(219 / 255.0, 202 / 255.0, 46 / 255.0, .7);
         }
 
-          ImGui::SameLine();
+    
+         
         if (ImGui::Button("Fill Line")) {
 
             if (ClickInput == FillCCLine) {
@@ -668,6 +673,7 @@ int main(void)
 
 
         }
+
 
         colors[ImGuiCol_Button] = basicButton;
 
@@ -714,6 +720,41 @@ int main(void)
         }
 
 
+        colors[ImGuiCol_Button] = ImVec4(144.0 / 255.0, 18.0 / 255.0, 208.0 / 255.0, .5);
+        ImGui::Spacing();
+        if (ImGui::Button("Fill LCA")) {
+
+            int xmin = Screen[0];
+            int ymin = Screen[1];
+
+            int xmax = -Screen[0];
+            int ymax = -Screen[1];
+
+            for (int i = 0; i < Poly.getPoints().size(); i++)
+            {
+                if (Poly[i][0] < xmin) {
+                    xmin = Poly[i][0];
+                }
+
+                if (Poly[i][0] > xmax) {
+                    xmax = Poly[i][0];
+                }
+
+                if (Poly[i][1] > ymax) {
+                    ymax = Poly[i][1];
+                }
+
+                if (Poly[i][1] < ymin) {
+                    ymin = Poly[i][1];
+                }
+
+            }
+
+
+            pixelScreens = FillLCA(Poly, pixelScreens, Screen[0], xmin, ymin, xmax, ymax);
+        }
+
+
 
         colors[ImGuiCol_Button] = basicButton;
 
@@ -739,17 +780,27 @@ int main(void)
 
         }
 
+       
 
         if (fill && pile.size() > 0) {
            
-            pixelScreens = FillStackUpdate((int)Screen[0], (int)Screen[1], pixelScreens, pile);
+            while (pile.size() > 0 && it < 500) {
+                pixelScreens = FillStackUpdate((int)Screen[0], (int)Screen[1], pixelScreens, pile);
+                it++;
+            }
+          
          //   std::cout << getPixelColor(600, 600, Screen[0], Screen[1], pixelScreens) << std::endl;
             
-            if (pile.size() % 100 == 0) {
+            if (it >= 500) {
                 loadTexture(0, pixelScreens, Screen[0], Screen[1]);
+                it = 0;
             }
+
            
         
+        }
+        else {
+            fill = false;
         }
        
       

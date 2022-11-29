@@ -104,3 +104,12 @@ class PolySeg : public Polygone {
 
 
 };
+
+struct LCA {
+	int ymax;
+	int x;
+	float dir[2];
+
+	LCA *next;
+
+};

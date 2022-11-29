@@ -327,7 +327,7 @@ std::vector<float*> SutherLandHodman(Polygone Cpolly, Polygone Window) {
 
 
     bool Orientation = isClockWise(PW.getFlatVector());
-
+  
     for (i = 0; i < N3-1; i ++) {
         N2 = 0;
         PS = std::vector<float*>();
@@ -393,31 +393,33 @@ bool CyrusBeck(float* A, float* B, std::vector<float> PW) {
 
     float* S = new float[2] {PW[0], PW[1]};
 
-    bool b = isClockWise(PW);
 
     _PW.push_back(S[0]);
     _PW.push_back(S[1]);
+
+    bool b = isClockWise(_PW);
+
+
     for (int i = 2; i <= _PW.size() - 2; i += 2) {
 
         int idx = (i + 1) % _PW.size();
-
+        float xm = (_PW[i + 1] - S[1]);
+        float ym = (_PW[i] - S[0]);
 
         if (b) {
 
 
 
-            float xm = -(_PW[i + 1] - S[1]);
-            float ym = (_PW[i] - S[0]);
+           
 
             // std::cout << xm <<" "<< ym << std::endl;
-            normal.push_back(new float [2] {xm, ym});
+            normal.push_back(new float [2] {-xm, ym});
         }
         else {
 
-            float xm = _PW[i + 1] - S[1];
-            float ym = -(_PW[i] - S[0]);
+            
             // std::cout << xm <<" "<< ym << std::endl;
-            normal.push_back(new float [2] {xm, ym});
+            normal.push_back(new float [2] {xm, -ym});
         }
 
 
@@ -537,9 +539,6 @@ std::vector<float>  GenerateCyrusBeck(std::vector<float>lstPointsFenetre, std::v
         S = new float[2] {tmpPL[i], tmpPL[i + 1]};
     }
 
-
-
-
     if (criticalSeg.size() > 0) {
 
 
@@ -553,15 +552,18 @@ std::vector<float>  GenerateCyrusBeck(std::vector<float>lstPointsFenetre, std::v
             tmpPL = lstPointsFenetre;
         }
 
-        for (int i = 2; i < tmpPL.size() + 1; i += 2) {
+        for (int i = 2; i < tmpPL.size() ; i += 2) {
 
             if (criticalSeg.size() <= 0) {
                 break;
             }
 
 
+            float tmp[2];
+            tmp[0] = tmpPL[i];
+            tmp[1] = tmpPL[i+1];
 
-            int k = isInterseptCriticalSegment(new float[2] {tmpPL[i], tmpPL[i + 1]}, criticalSeg);
+            int k = isInterseptCriticalSegment(tmp, criticalSeg);
             int j = (i) % tmpPL.size();
             if (k < 0) {
 
@@ -925,6 +927,84 @@ float* LineFill(int _x,int _y,int width,int height,float* lstColor,float CC = 1.
 
 
     }
+
+    return lstColor;
+}
+
+
+bool isIntersect(Polygone polly,float* point, int xdir) {
+
+    float B[2];
+    B[0] = (point[0] + xdir);
+    B[1] = point[1];
+
+    int sum = 0;
+
+
+    std::vector<float*> pl = polly.getPoints();
+
+    for (int i = 0; i < pl.size()-1; i++) {
+        float* b = intersection(pl[i], pl[i + 1],point, B);
+        if (b[0] != 0 && b[1] != 0) {
+            sum++;
+        }
+    }
+
+    return sum > 0;
+}
+
+float* FillLCA(Polygone Poly,float* lstColor,int width,int minx,int miny,int maxx,int maxy) {
+
+    int height = (maxy - miny);
+
+    LCA * SI = new LCA[height];
+    LCA *tmp = nullptr;
+    for (int i = Poly.getPoints().size()-1; i >0; i--) {
+        LCA lca;
+        
+        int y = miny - (int)Poly[i][1];
+       
+        lca.dir[0] = (Poly[i-1][0] - Poly[i][0];
+        lca.dir[1] = Poly[i-1][1] - Poly[i][1];
+
+        lca.dir[0] = lca.dir[0] / norme(lca.dir); // normalise
+        lca.dir[1] = lca.dir[1] / norme(lca.dir); // normalise
+        
+
+        lca.x = Poly[i][1];
+
+        if (Poly[i-1][1] > Poly[i][0]) {
+            lca.ymax = Poly[i-1][1];
+        }
+        else {
+            lca.ymax = Poly[i][0];
+        }
+
+        if (tmp != nullptr) {
+            tmp->next = &lca;
+        }
+        
+      
+
+        tmp = &lca;
+
+        SI[y] = lca;
+    }
+
+    LCA lca;
+
+    //for (int i = miny; i = maxy; i++) {
+
+    //    float A[2];
+    //    A[0] = 0;
+    //    A[1] = i;
+
+    //    float B[2];
+    //    B[0] = maxx;
+    //    B[1] = i;
+
+
+    //}
 
     return lstColor;
 }
