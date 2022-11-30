@@ -13,8 +13,6 @@ double* VecProduct(double* vec1, double* vec2) {
     };
 }
 
-
-
 double dot(float* vec1, double* vec2) {
     return vec1[0] * vec2[0] + vec1[1] * vec2[1];
 }
@@ -36,8 +34,6 @@ bool isContainOnline(float* a, float* c, float* b) {
     float v = (acn + cbn) - abn;
     return (v < 0.05);
 }
-
-
 
 
 // For matrix
@@ -958,13 +954,15 @@ float* FillLCA(Polygone Poly,float* lstColor,int width,int minx,int miny,int max
     int height = (maxy - miny);
 
     LCA * SI = new LCA[height];
-    LCA *tmp = nullptr;
+
+    LCA* first;
+    LCA* tmp = nullptr;
     for (int i = Poly.getPoints().size()-1; i >0; i--) {
+       
         LCA lca;
-        
         int y = miny - (int)Poly[i][1];
        
-        lca.dir[0] = (Poly[i-1][0] - Poly[i][0];
+        lca.dir[0] = Poly[i-1][0] - Poly[i][0];
         lca.dir[1] = Poly[i-1][1] - Poly[i][1];
 
         lca.dir[0] = lca.dir[0] / norme(lca.dir); // normalise
@@ -980,6 +978,10 @@ float* FillLCA(Polygone Poly,float* lstColor,int width,int minx,int miny,int max
             lca.ymax = Poly[i][0];
         }
 
+        if (i == Poly.getPoints().size()-1) {
+            first = &lca;
+        }
+
         if (tmp != nullptr) {
             tmp->next = &lca;
         }
@@ -991,7 +993,7 @@ float* FillLCA(Polygone Poly,float* lstColor,int width,int minx,int miny,int max
         SI[y] = lca;
     }
 
-    LCA lca;
+
 
     //for (int i = miny; i = maxy; i++) {
 
