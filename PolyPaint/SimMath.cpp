@@ -405,9 +405,7 @@ bool CyrusBeck(float* A, float* B, std::vector<float> PW) {
         if (b) {
 
 
-
-           
-
+         
             // std::cout << xm <<" "<< ym << std::endl;
             normal.push_back(new float [2] {-xm, ym});
         }
@@ -594,8 +592,6 @@ std::vector<float>  GenerateCyrusBeck(std::vector<float>lstPointsFenetre, std::v
 
     return newPL;
 }
-
-
 
 
 //  REMPLISSAGE ==================================
@@ -949,64 +945,256 @@ bool isIntersect(Polygone polly,float* point, int xdir) {
     return sum > 0;
 }
 
-float* FillLCA(Polygone Poly,float* lstColor,int width,int minx,int miny,int maxx,int maxy) {
 
-    int height = (maxy - miny);
+LCA* insertLCA(LCA* insert, LCA* newLCA) {
+   
 
-    LCA * SI = new LCA[height];
+    if (insert == newLCA || newLCA == NULL) return insert;
 
-    LCA* first;
-    LCA* tmp = nullptr;
-    for (int i = Poly.getPoints().size()-1; i >0; i--) {
+    if (insert == NULL) return newLCA;
+   
+
+    LCA* idx = insert;
+
+    if (idx == NULL) {
+        std::cout << "idx null" << std::endl;
+    }
+
+    while ( idx != NULL && idx->validNext) {
+        idx = idx->next;
+    }
+
+    idx->next = newLCA;
+    idx->validNext = true;
+
+    return insert;
+}
+
+LCA sort(LCA* inserted) {
+   
+    LCA* idx = inserted;
+    std::vector<LCA*> sorted;
+    while (idx->validNext) {
+        sorted.push_back(idx);
+        idx = idx->next;
+    }
+    sorted.push_back(idx);
+
+    bool end = false;
+
+    while (!end) {
+        end = true;
+        for (int i = 0; i < sorted.size()-1; i++) {
+            sorted[i]->next = NULL;
+            sorted[i]->validNext = false;
+            if (sorted[i + 1]->x < sorted[i]->x || (sorted[i + 1]->x == sorted[i]->x && sorted[i+1]->dir[0] < sorted[i]->dir[0])) {
+                std::swap(sorted[i], sorted[i + 1]);
+                end = false;
+            }
+        }
+    }
+
+    sorted[sorted.size() - 1]->next = NULL;
+    sorted[sorted.size() - 1]->validNext = false;
+
+    
+    for (int i = 0; i < sorted.size(); i++) {
+
+        inserted = insertLCA(inserted, sorted[i]);
+    }
+
+    return *inserted;
+}
+
+
+
+std::vector<LCA> InitSI(Polygone poly,int size,int ymin) {
+
+    std::vector<LCA> SI(size);
+    for (int i = 0; i < size; i++)
+    {
+        int j = 0;
+        bool find = false;
+        int height = ymin + i;
+        while (j < poly.getPoints().size() && !find) {
+            int nxt = (j + 1) % (poly.getPoints().size());
+            LCA* tmp;
+           
+            if ( abs((poly[j][1] - height)) < 1  && (poly[nxt][1] > height || height == ymin + size -1 )) {
+                
+               
+                tmp = new LCA;
+
+                if (poly[j][1] > poly[nxt][1]) {
+                    tmp->ymax = poly[j][1];
+                }
+                else {
+                    tmp->ymax = poly[nxt][1];
+                }
+
+                float invDir[2];
+                
+                float y1 = (poly[j][1]);
+                float y2 = (poly[nxt][1]);
+                
+                float x1 = (poly[j][0]);
+                float x2 = (poly[nxt][0]);
+
+                std::cout << x1 << " " << 720 - y1 << std::endl;
+
+                float distance = sqrt(powf((x2 - x1), 2) + powf((y2 - y1), 2));
+                invDir[0] = ((x2 - x1))/((y2 - y1));
+                invDir[1] = ((y2 - y1)) / distance;
+
+                tmp->x = poly[j][0];
+                tmp->dir[0] = invDir[0];
+                tmp->dir[1] = invDir[1];
+
+
+                if (SI[i].x == 0) {
+                    SI[i] = *tmp;
+                }
+                else {
+                 
+                    SI[i] = *insertLCA(&SI[i], tmp);
+               
+                }
+               
+            }
+            else if ( abs((poly[nxt][1]) - height) < 1 &&  (poly[j][1] > height || height == ymin + size -1)) {
+                
+              
+                tmp = new LCA;
+
+                if (poly[j][1] > poly[nxt][1]) {
+                    tmp->ymax = poly[j][1];
+                }
+                else {
+                    tmp->ymax = poly[nxt][1];
+                }
+
+                
+                float invDir[2];
+
+                float y1 = (poly[j][1]);
+                float y2 = (poly[nxt][1]);
+
+                float x1 = (poly[j][0]);
+                float x2 = (poly[nxt][0]);
+
+                std::cout << x1 << " " << 720 - y1 << std::endl;
+
+                float distance = sqrt( powf((x2 - x1),2) + powf((y2 - y1), 2));
+                invDir[0] = ( (x1 - x2)/ (y1 - y2));
+                invDir[1] = ((y1 - y2) / distance);
+              
+                tmp->x = poly[nxt][0];
+                tmp->dir[0] = invDir[0];
+                tmp->dir[1] = invDir[1];
+
+                if (SI[i].x == 0) {
+                    SI[i] = *tmp;
+                }
+                else {
+                    SI[i] = *insertLCA(&SI[i], tmp);
+                }
+
+            }
        
-        LCA lca;
-        int y = miny - (int)Poly[i][1];
-       
-        lca.dir[0] = Poly[i-1][0] - Poly[i][0];
-        lca.dir[1] = Poly[i-1][1] - Poly[i][1];
-
-        lca.dir[0] = lca.dir[0] / norme(lca.dir); // normalise
-        lca.dir[1] = lca.dir[1] / norme(lca.dir); // normalise
-        
-
-        lca.x = Poly[i][1];
-
-        if (Poly[i-1][1] > Poly[i][0]) {
-            lca.ymax = Poly[i-1][1];
-        }
-        else {
-            lca.ymax = Poly[i][0];
+            j++;
+          
         }
 
-        if (i == Poly.getPoints().size()-1) {
-            first = &lca;
-        }
+     
 
-        if (tmp != nullptr) {
-            tmp->next = &lca;
-        }
-        
-      
-
-        tmp = &lca;
-
-        SI[y] = lca;
     }
 
 
 
-    //for (int i = miny; i = maxy; i++) {
-
-    //    float A[2];
-    //    A[0] = 0;
-    //    A[1] = i;
-
-    //    float B[2];
-    //    B[0] = maxx;
-    //    B[1] = i;
+    return SI;
+}
 
 
-    //}
+LCA* deleteFromY(LCA* lca,int y,int miny) {
+
+    LCA* idx = lca;
+
+    if (lca == NULL) return NULL;
+
+  
+    if (idx->ymax <= y+ miny && !idx->validNext) {
+        return NULL;
+    }
+    else if (idx->ymax <= y + miny && idx->validNext) {
+        lca = idx->next;
+    }
+    
+
+    while (idx != NULL && idx->validNext != false) {
+        if (idx->next->ymax <= y+ miny) {
+            idx->next = idx->next->next;
+            if (idx->next == NULL) {
+                idx->validNext = false;
+            }
+        }
+        idx = idx->next;
+    }
+
+
+    return lca;
+}
+
+
+float* FillLCA(Polygone Poly,float* lstColor,int width,int height,int minx,int miny,int maxx,int maxy) {
+    
+
+    // Init LCA
+    int size = Poly.getPoints().size();
+    int Value = int(maxy - miny)+1;
+    std::vector<LCA> SI = InitSI(Poly,Value,miny);
+    LCA initLCA;
+
+
+    // FILL
+    LCA t;
+    LCA nxt;
+    for (int y = 0; y < Value; y++) {
+        
+        if (SI[y].x != 0) {
+            
+            initLCA = *insertLCA(&initLCA,&SI[y]);
+            initLCA = sort(&initLCA);
+
+            initLCA = *deleteFromY(&initLCA, y, miny);
+        }
+
+
+        LCA* p = &initLCA;
+        bool parite = true;
+        while (p != NULL && p->next != nullptr) {
+           
+            if (parite) {
+                float x1 = p->x + p->dir[0];
+                float x2 = p->next->x + p->next->dir[0];
+            
+                for (int x = x1; x <= x2; x++) {
+                    int ypos = height - (y+miny);
+                    lstColor[(width * (ypos)) + (int)x] = 1.0;
+                }
+
+                p->x = x1;
+                p->next->x = x2;
+            }
+
+            p = p->next;
+            parite = !parite;
+
+        }
+
+                      
+    }
+
+ 
 
     return lstColor;
 }

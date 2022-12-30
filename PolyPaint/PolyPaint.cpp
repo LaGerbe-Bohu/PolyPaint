@@ -18,6 +18,7 @@ bool Fenetrage = false;
 bool PolyEdit = true;
 bool WindoEdit = false;
 bool Sutherland = true;
+int currentSelectPoly = 0;
 
 enum Input
 {
@@ -36,9 +37,12 @@ bool fill = false;
 Polygone Poly;
 Polygone Wind;
 
+std::vector<Polygone> lstPolygones;
 
 std::vector<float> lstofPixel;
 float *pixelScreens;
+
+std::vector<float*> lstOfPS;
 
 float** array2D(int n, int m, int val = 0) {
     float** tab = new float* [n];
@@ -70,6 +74,8 @@ void loadTexture(int f, float* data,float with,float hieght) {
         GL_NEAREST);
 
 
+
+
     int w, h;
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, with, hieght, 0, GL_RED, GL_FLOAT, data);
@@ -97,6 +103,10 @@ void Initialize()
     Poly = Polygone();
     Wind = Polygone();
 
+
+    lstOfPS.push_back(pixelScreens);
+    lstPolygones.push_back(Poly);
+
     blank.push_back(-10);
     blank.push_back(-10);
 
@@ -104,13 +114,7 @@ void Initialize()
     g_triangleShader.LoadVertexShader("../../../../PolyPaint/shader.vert");
     g_triangleShader.Create();
 
-
-
-
-
 }
-
-
 
 void Terminate()
 {
@@ -148,26 +152,26 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 break;
 
                 case FillCCRec:
-                    pixelScreens = FillFormConex((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], Screen[0], Screen[1], pixelScreens);
-                    loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
+                    lstOfPS[currentSelectPoly] = FillFormConex((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], Screen[0], Screen[1], lstOfPS[currentSelectPoly]);
+                    loadTexture(currentSelectPoly, lstOfPS[currentSelectPoly], Screen[0], (int)Screen[1]);
                     ClickInput = AddPoly;
                 break;
 
                 case FillCCLine:
-                    pixelScreens = LineFill((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], Screen[0], Screen[1], pixelScreens);
-                    loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
+                    lstOfPS[currentSelectPoly] = LineFill((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], Screen[0], Screen[1], lstOfPS[currentSelectPoly]);
+                    loadTexture(currentSelectPoly, lstOfPS[currentSelectPoly], Screen[0], (int)Screen[1]);
                     ClickInput = AddPoly;
                 break;
 
                 case FillCCit:
-                    pixelScreens = FillStack((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], (int)Screen[0], (int)Screen[1], pixelScreens);
-                    loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
+                    lstOfPS[currentSelectPoly] = FillStack((int)mousePos[0], (int)Screen[1] - (int)mousePos[1], (int)Screen[0], (int)Screen[1], lstOfPS[currentSelectPoly]);
+                    loadTexture(currentSelectPoly, lstOfPS[currentSelectPoly], Screen[0], (int)Screen[1]);
                     ClickInput = AddPoly;
                 break;
                 case AddPoly:
 
                     if (!Fenetrage && PolyEdit) {
-                        Poly.push_back(mousePos);
+                        lstPolygones[currentSelectPoly].push_back(mousePos);
                         lstPoints.push_back(mousePos[0]);
                         lstPoints.push_back(mousePos[1]);
                     }
@@ -198,26 +202,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 
-void Render(GLFWwindow* window)
-{
-    int width, height;
-    glfwGetWindowSize(window, &width, &height);
-
-    glViewport(0, 0, width, height);
-    glClearColor(0.0f, 1.0f, 1.0f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glfwGetCursorPos(window, &xpos, &ypos);
-
-   
-    glfwSetKeyCallback(window, key_callback);
-
+void RenderPolygone(int width, int height, int index) {
 
     auto sh_Triangle = g_triangleShader.GetProgram();
     glUseProgram(sh_Triangle);
-
-
-    
 
     const float aspectRatio = float(width) / float(height);
     const float zNear = 0.1f, zFar = 10000000.0f;
@@ -268,11 +256,15 @@ void Render(GLFWwindow* window)
     glEnableVertexAttribArray(loc_uv);
 
 
-  
 
+    const auto loc_float_texture = glGetUniformLocation(
+        sh_Triangle, "float_texture"
+    );
 
-  /*  mousePos[0] = (xpos / Screen[0]);
-    mousePos[1] = (1.0f - (ypos / Screen[1]));*/
+    glUniform1i(loc_float_texture, index);
+
+    /*  mousePos[0] = (xpos / Screen[0]);
+      mousePos[1] = (1.0f - (ypos / Screen[1]));*/
 
     GLint m_viewport[4];
 
@@ -296,8 +288,8 @@ void Render(GLFWwindow* window)
     glUniform2fv(loc_resolution, 1, &Screen[0]);
 
 
-    std::vector<float> tempVector = Poly.getFlatVector();
-   
+    std::vector<float> tempVector = lstPolygones[index].getFlatVector();
+
     if (tempVector.size() <= 0) {
         tempVector = blank;
     }
@@ -313,15 +305,13 @@ void Render(GLFWwindow* window)
     );
 
     glUniform1i(loc_size_point, int(tempVector.size() / 2));
-    
+
 
     const auto loc_size_pixel = glGetUniformLocation(
         sh_Triangle, "u_sizePixel"
     );
 
     glUniform1i(loc_size_pixel, int(lstofPixel.size() / 2));
-   
-
 
     tempVector = Wind.getFlatVector();
 
@@ -329,16 +319,11 @@ void Render(GLFWwindow* window)
         tempVector = blank;
     }
 
-  
-
     const auto loc_fenetre = glGetUniformLocation(
         sh_Triangle, "u_fenetre"
     );
 
-
     glUniform2fv(loc_fenetre, tempVector.size(), &tempVector[0]);
-
-
 
     const auto loc_size_fenetre = glGetUniformLocation(
         sh_Triangle, "u_sizeOfFenetre"
@@ -346,16 +331,41 @@ void Render(GLFWwindow* window)
 
     glUniform1i(loc_size_fenetre, int(tempVector.size() / 2));
 
-    const auto loc_float_texture = glGetUniformLocation(
-        sh_Triangle, "float_texture"
-    );
+  
 
-    glUniform1i(loc_float_texture,0);
-   
 
 
     glDrawArrays(GL_QUADS, 0, 4);
 }
+
+void Render(GLFWwindow* window)
+{
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+
+    glViewport(0, 0, width, height);
+    glClearColor(13.0 / 255.0, 15.0 / 255.0, 19.0 / 255.0, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
+
+    glfwGetCursorPos(window, &xpos, &ypos);
+
+   
+    glfwSetKeyCallback(window, key_callback);
+
+   
+    
+    for (int i = 0; i < lstPolygones.size(); i++)
+    {
+        RenderPolygone(width, height, i);
+    }
+    
+
+}
+
+
 
 
 void SwitchEdit() {
@@ -414,11 +424,7 @@ int main(void)
 
     for (int i = 0; i < Screen[0]; i++) {
         for (int j = 0; j < Screen[1]; j++) {
-
-
             pixelScreens[( (int)Screen[0] * j) + i] = 0.0;
-
-            
         }
     }
 
@@ -446,7 +452,7 @@ int main(void)
    /*     ImGui::ShowDemoWindow();
        
        ;*/
-       // ImGui::ShowStyleEditor();
+        //ImGui::ShowStyleEditor();
 
         ImGui::SetNextWindowPos(ImVec2(30.0, 30.0));
 
@@ -480,9 +486,9 @@ int main(void)
         
         ImGui::Spacing();
         colors[ImGuiCol_Button] = ImVec4(0.00f, 1.0, 128.0 / 255.0, 0.5);
-        if (Poly.getPoints().size() > 0 && ImGui::Button("Reset Pollygone")) {
+        if (lstPolygones[currentSelectPoly].getPoints().size() > 0 && ImGui::Button("Reset Pollygone")) {
          
-            Poly.setPoints(std::vector<float*>());
+            lstPolygones[currentSelectPoly].setPoints(std::vector<float*>());
 
         }
         colors[ImGuiCol_Button] = basicButton;
@@ -527,7 +533,7 @@ int main(void)
         ImGui::NewLine();
         ImGui::Spacing();
         
-        if (Wind.getPoints().size() >= 3 && Poly.getPoints().size() >= 3) {
+        if (Wind.getPoints().size() >= 3 && lstPolygones[currentSelectPoly].getPoints().size() >= 3) {
 
        
 
@@ -538,7 +544,7 @@ int main(void)
             
                // lstPoints = SutherLandHodman(lstPoints, lstPointsFenetre);
                 Wind.push_back(Wind[0]);
-                Poly = SutherLandHodman(Poly,Wind);
+                lstPolygones[currentSelectPoly] = SutherLandHodman(lstPolygones[currentSelectPoly],Wind);
             }
             ImGui::Spacing();
 
@@ -547,7 +553,7 @@ int main(void)
 
 
                
-                std::vector<float> d = GenerateCyrusBeck(Wind.getFlatVector(),Poly.getFlatVector() );
+                std::vector<float> d = GenerateCyrusBeck(Wind.getFlatVector(), lstPolygones[currentSelectPoly].getFlatVector() );
                 std::vector<float*> tmp;
 
                
@@ -557,7 +563,7 @@ int main(void)
                         tmp.push_back(new float[2] {d[i], d[i + 1]});
                     }
 
-                    Poly.setPoints(tmp);
+                    lstPolygones[currentSelectPoly].setPoints(tmp);
                 }
 
              
@@ -567,6 +573,10 @@ int main(void)
         }
         
       
+
+        ImGui::BeginTable("t",2);
+        ImGui::TableHeader("test");
+        ImGui::EndTable();
    
           
  
@@ -693,29 +703,29 @@ int main(void)
             int xmax = -Screen[0];
             int ymax = -Screen[1];
 
-            for (int i = 0; i < Poly.getPoints().size(); i++)
+            for (int i = 0; i < lstPolygones[currentSelectPoly].getPoints().size(); i++)
             {
-                if (Poly[i][0] < xmin) {
-                    xmin = Poly[i][0];
+                if (lstPolygones[currentSelectPoly][i][0] < xmin) {
+                    xmin = lstPolygones[currentSelectPoly][i][0];
                 }
 
-                if (Poly[i][0] > xmax) {
-                    xmax = Poly[i][0];
+                if (lstPolygones[currentSelectPoly][i][0] > xmax) {
+                    xmax = lstPolygones[currentSelectPoly][i][0];
                 }
 
-                if (Poly[i][1] > ymax) {
-                    ymax = Poly[i][1];
+                if (lstPolygones[currentSelectPoly][i][1] > ymax) {
+                    ymax = lstPolygones[currentSelectPoly][i][1];
                 }
 
-                if (Poly[i][1] < ymin) {
-                    ymin = Poly[i][1];
+                if (lstPolygones[currentSelectPoly][i][1] < ymin) {
+                    ymin = lstPolygones[currentSelectPoly][i][1];
                 }
 
             }
 
 
-            pixelScreens = fillRect(Poly, new int[2] {xmin, ymin}, new int[2] {xmax, ymax}, pixelScreens, Screen[0], Screen[1]);
-            loadTexture(0, pixelScreens, Screen[0], (int)Screen[1]);
+            lstOfPS[currentSelectPoly] = fillRect(lstPolygones[currentSelectPoly], new int[2] {xmin, ymin}, new int[2] {xmax, ymax}, lstOfPS[currentSelectPoly], Screen[0], Screen[1]);
+            loadTexture(currentSelectPoly, lstOfPS[currentSelectPoly], Screen[0], (int)Screen[1]);
           
         }
 
@@ -730,34 +740,31 @@ int main(void)
             int xmax = -Screen[0];
             int ymax = -Screen[1];
 
-            for (int i = 0; i < Poly.getPoints().size(); i++)
+            for (int i = 0; i < lstPolygones[currentSelectPoly].getPoints().size(); i++)
             {
-                if (Poly[i][0] < xmin) {
-                    xmin = Poly[i][0];
+                if (lstPolygones[currentSelectPoly][i][0] < xmin) {
+                    xmin = lstPolygones[currentSelectPoly][i][0];
                 }
 
-                if (Poly[i][0] > xmax) {
-                    xmax = Poly[i][0];
+                if (lstPolygones[currentSelectPoly][i][0] > xmax) {
+                    xmax = lstPolygones[currentSelectPoly][i][0];
                 }
 
-                if (Poly[i][1] > ymax) {
-                    ymax = Poly[i][1];
+                if (lstPolygones[currentSelectPoly][i][1] > ymax) {
+                    ymax = lstPolygones[currentSelectPoly][i][1];
                 }
 
-                if (Poly[i][1] < ymin) {
-                    ymin = Poly[i][1];
+                if (lstPolygones[currentSelectPoly][i][1] < ymin) {
+                    ymin = lstPolygones[currentSelectPoly][i][1];
                 }
 
             }
 
-
-            pixelScreens = FillLCA(Poly, pixelScreens, Screen[0], xmin, ymin, xmax, ymax);
+            lstOfPS[currentSelectPoly] = FillLCA(lstPolygones[currentSelectPoly], lstOfPS[currentSelectPoly], Screen[0],Screen[1], xmin, ymin, xmax, ymax);
+            loadTexture(currentSelectPoly, lstOfPS[currentSelectPoly], Screen[0], (int)Screen[1]);
         }
 
-
-
         colors[ImGuiCol_Button] = basicButton;
-
 
         ImGui::NewLine();
         ImGui::Text("Reset Fill");
@@ -768,31 +775,25 @@ int main(void)
 
             for (int i = 0; i < Screen[0]; i++) {
                 for (int j = 0; j < Screen[1]; j++) {
-
-
-                    pixelScreens[((int)Screen[0] * j) + i] = 0.0;
-                   
-
+                   lstOfPS[currentSelectPoly][((int)Screen[0] * j) + i] = 0.0;
                 }
             }
 
-            loadTexture(0, pixelScreens, Screen[0], Screen[1]);
+            loadTexture(currentSelectPoly, lstOfPS[currentSelectPoly], Screen[0], Screen[1]);
 
         }
-
-       
 
         if (fill && pile.size() > 0) {
            
             while (pile.size() > 0 && it < 500) {
-                pixelScreens = FillStackUpdate((int)Screen[0], (int)Screen[1], pixelScreens, pile);
+                lstOfPS[currentSelectPoly] = FillStackUpdate((int)Screen[0], (int)Screen[1], lstOfPS[currentSelectPoly], pile);
                 it++;
             }
           
          //   std::cout << getPixelColor(600, 600, Screen[0], Screen[1], pixelScreens) << std::endl;
             
             if (it >= 500) {
-                loadTexture(0, pixelScreens, Screen[0], Screen[1]);
+                loadTexture(currentSelectPoly, lstOfPS[currentSelectPoly], Screen[0], Screen[1]);
                 it = 0;
             }
 
@@ -812,7 +813,78 @@ int main(void)
         ImGui::SetNextWindowPos(ImVec2(30.0, ( (400) + 90 )));
 
 
-        ImGui::ShowDebugLogWindow(new bool[1]{true});
+        ImGui::Begin("Polygones");
+        
+        if (ImGui::Button("Add Polygone")) {
+            
+            lstPolygones.push_back(  Polygone());
+            currentSelectPoly++;
+            float* f = new float[Screen[0] * Screen[1]];
+            lstOfPS.push_back(f);
+
+            for (int i = 0; i < Screen[0]; i++) {
+                for (int j = 0; j < Screen[1]; j++) {
+                    lstOfPS[currentSelectPoly][((int)Screen[0] * j) + i] = 0.0;
+                }
+            }
+
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Remove Polygone")) {
+            lstPolygones.erase(lstPolygones.begin() + currentSelectPoly);
+
+            currentSelectPoly = (currentSelectPoly + 1) % lstPolygones.size();
+
+        }
+
+        ImGui::SetWindowSize(ImVec2(300, 200));
+
+        if (ImGui::BeginTable("Table", 3,
+            ImGuiTableFlags_RowBg |
+            ImGuiTableFlags_ScrollY))
+        {
+            ImGui::TableSetupColumn("Name");
+            ImGui::TableSetupColumn("Number of Point");
+            ImGui::TableSetupColumn(" ");
+
+            const int nbLines = lstPolygones.size();
+            for (int i = 0; i < nbLines; ++i)
+            {
+                ImGui::TableNextRow();
+                ImGui::PushID(i);
+
+                ImGui::TableSetColumnIndex(0);
+
+                ImGui::Selectable("Polygone : "+i,nbLines,
+                    ImGuiSelectableFlags_SpanAllColumns
+                );
+
+                if (ImGui::IsItemClicked(0)) {
+                    currentSelectPoly = i;
+                }
+
+                ImGui::TableNextColumn();
+                
+                ImGui::Text("%i",lstPolygones[i].getPoints().size());
+
+                ImGui::TableNextColumn();
+
+
+                if (currentSelectPoly == i) {
+                    ImGui::Text("X");
+                }
+
+                
+               
+                ImGui::PopID();
+            }
+        }
+        ImGui::EndTable();
+
+
+        ImGui::End();
 
         /* Render here */
         ImGui::Render();
@@ -828,6 +900,7 @@ int main(void)
      
 
     }
+
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

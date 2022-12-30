@@ -100,16 +100,40 @@ class PolySeg : public Polygone {
 	CriticalSegment operator[](int a) {
 		return Segments[a];
 	}
-	
 
 
 };
 
-struct LCA {
+
+class LCA {
+	public:
 	int ymax;
-	int x;
+	float x;
 	float dir[2];
+	bool validNext = false;
+	LCA* next;
 
-	LCA *next;
+	LCA() {
+		ymax = NULL;
+		x = NULL;
+		dir[0] = 0;
+		dir[1] = 0;
+		validNext = false;
+		next = nullptr;
+	}
+
+	LCA(const LCA& lca) {
+		ymax = lca.ymax;
+		x = lca.x;
+		dir[0] = lca.dir[0];
+		dir[1] = lca.dir[1];
+		validNext = lca.validNext;
+		next = lca.next;
+	}
+
 
 };
+
+
+
+

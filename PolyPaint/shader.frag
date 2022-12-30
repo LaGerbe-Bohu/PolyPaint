@@ -59,7 +59,7 @@ void main(void){
 
  //   vec2 position =  (u_mousePos.xy - .5*u_resolution.xy) / minres;
 
-    vec3 src = vec3(13.0/255.0,15.0/255.0,19.0/255.0);
+    vec3 src = vec3(0.0,0.0,0.0);
     float dist = 0.0;
 
 
@@ -130,7 +130,8 @@ void main(void){
     float float_texel = float( texture2D(float_texture, vec2(texuv.x, 1-texuv.y)));
 
     src += float_texel * vec3(76/255.0, 81/255.0, 230/255.0);
-  
-    gl_FragColor = vec4(src,1.0);
+    
+
+    gl_FragColor = vec4(src,float((src.x+src.y+src.z)>0.0));
 
 }
