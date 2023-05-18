@@ -1,28 +1,45 @@
 #pragma once
 
+enum type { Pol,Cur,Ent };
 
-class Polygone {
+class Entity {
 
 	std::vector<float*> Points;
-	
+	type _Type;
 	public :
+		
 
-		Polygone() :Points(std::vector<float*>()) { }
+		Entity() :Points(std::vector<float*>()) { }
 
-		Polygone(std::vector<float*> P) : Points(P) { }
+		Entity(std::vector<float*> P) : Points(P) { }
 
-		Polygone(const Polygone& p) : Points(p.Points){ };
+		Entity(const Entity& p) : Points(p.Points),_Type(p._Type) { };
 
 		void push_back(float* b) {
 			float* p = new float[2] {b[0], b[1]};
 			Points.push_back(p);
 		}
 		
-		std::vector<float*> getPoints() { return Polygone::Points; };
+		std::vector<float*> getPoints() { return Entity::Points; };
 		
 
+		void setType(type t) {
+			_Type = t;
+		}
+
+		type getType() {
+			return _Type;
+		}
+
 		void setPoints(std::vector<float*> p) {
-			Points = std::vector<float*>(p);
+		
+			Points.clear();
+			for (int i = 0; i < p.size(); i++)
+			{
+				float* b = new float[2] {p[i][0], p[i][1]};
+				Points.push_back(b);
+			}
+
 		}
 
 		std::vector<float> getFlatVector() {
@@ -40,9 +57,29 @@ class Polygone {
 			return Points[a];
 		}
 
+		~Entity() {
+			Points.clear();
+		}
 
 
 };
+
+
+class Polygone : public Entity {
+	
+	std::vector<float*> Points;
+	public :
+	Polygone():Points(std::vector<float*>()) {
+		setType(Pol);
+	}
+
+	Polygone(std::vector<float*> P) : Points(P) {
+		setType(Pol);
+	};
+
+
+};
+
 
 struct segment {
 	float* A;
@@ -60,6 +97,7 @@ class PolySeg : public Polygone {
 	std::vector<CriticalSegment> Segments;
 
 	public : 
+
 
 	PolySeg() :Polygone(),Segments(std::vector<CriticalSegment>()){}
 
@@ -135,5 +173,17 @@ class LCA {
 };
 
 
+class Curve: public Polygone {
 
+	std::vector<float*> Points;
+	public:
+
+	Curve() :Points(std::vector<float*>()) {
+		setType(Cur);
+	}
+
+	Curve(std::vector<float*> P) : Points(P) {
+		setType(Cur);
+	};
+};
 

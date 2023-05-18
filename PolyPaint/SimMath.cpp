@@ -307,11 +307,11 @@ int isInterseptCriticalSegment(float* point, PolySeg poly) {
 
 // Clipping
 
-std::vector<float*> SutherLandHodman(Polygone Cpolly, Polygone Window) {
+std::vector<float*> SutherLandHodman(Entity Cpolly, Entity Window) {
     
-    Polygone PS;
-    Polygone PW = Window;
-    Polygone PL = Cpolly;
+    Entity PS;
+    Entity PW = Window;
+    Entity PL = Cpolly;
 
     int i, j;
     int N1 = PL.getPoints().size();
@@ -779,7 +779,7 @@ float* FillStack(int _x,int _y,int width,int height, float* lstColor,float CC = 
 }
 
 
-float* fillRect(Polygone poly,int* min,int* max,float* lstofPixel,int width,int height) {
+float* fillRect(Entity poly,int* min,int* max,float* lstofPixel,int width,int height) {
     
     int xmin = min[0];
     int ymin = min[1];
@@ -1008,7 +1008,7 @@ LCA sort(LCA* inserted) {
 
 
 
-std::vector<LCA> InitSI(Polygone poly,int size,int ymin) {
+std::vector<LCA> InitSI(Entity poly,int size,int ymin) {
 
     std::vector<LCA> SI(size);
     for (int i = 0; i < size; i++)
@@ -1145,7 +1145,7 @@ LCA* deleteFromY(LCA* lca,int y,int miny) {
 }
 
 
-float* FillLCA(Polygone Poly,float* lstColor,int width,int height,int minx,int miny,int maxx,int maxy) {
+float* FillLCA(Entity Poly,float* lstColor,int width,int height,int minx,int miny,int maxx,int maxy) {
     
 
     // Init LCA

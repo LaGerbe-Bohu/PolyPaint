@@ -10,6 +10,14 @@ set(APP_VERSION_MAJOR 1)
 set(APP_VERSION_MINOR 0)
 
 
+# glew
+include_directories(../libs/GLEW/include)
+link_directories(../libs/GLEW/lib/Release/x64)
+
+# glfw
+include_directories(../libs/GLFW/include)     
+link_directories(../libs/GLFW/lib-static-ucrt )
+
 
 add_subdirectory(imgui)
 include_directories(${PROJECT_SOURCE_DIR})
@@ -17,13 +25,6 @@ add_executable (PolyPaint "PolyPaint.cpp"  "PolyPaint.h"  "GLShader.cpp" "corout
 
 target_link_libraries(PolyPaint imgui)
 
-# glfw
-include_directories(../libs/include/GLFW/include)     
-link_directories(../libs/include/GLFW/lib-static-ucrt )
 
 
-# glew
-include_directories(../libs/include/GLEW/include)
-link_directories(../libs/include/GLEW/lib/Release/Win32)
-
-target_link_libraries(PolyPaint imgui glfw3 ${OPENGL_gl_LIBRARY} glew32s )
+target_link_libraries(PolyPaint imgui  ${OPENGL_gl_LIBRARY} glfw3dll glew32s opengl32)
