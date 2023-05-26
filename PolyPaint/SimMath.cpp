@@ -1,3 +1,5 @@
+#include <limits>
+#include <algorithm>
 
 // quick maths :
 
@@ -13,11 +15,16 @@ double* VecProduct(double* vec1, double* vec2) {
     };
 }
 
-double dot(float* vec1, double* vec2) {
+double dot(float* vec1, float* vec2) {
     return vec1[0] * vec2[0] + vec1[1] * vec2[1];
 }
 
+float distance( float* point1,  float* point2) {
+    float dx = point2[0] - point1[0];
+    float dy = point2[1] - point1[1];
 
+    return std::sqrt(dx * dx + dy * dy);
+}
 
 float norme(float* vec1) {
     return sqrtf((vec1[0] * vec1[0]) + (vec1[1] * vec1[1]));
@@ -35,6 +42,20 @@ bool isContainOnline(float* a, float* c, float* b) {
     return (v < 0.05);
 }
 
+
+float calculateAngle( float* vector1,  float* vector2) {
+    float d = dot(vector1, vector2);
+    float mag1 = norme(vector1);
+    float mag2 = norme(vector2);
+
+    float cosTheta = d / (mag1 * mag2);
+    float theta = std::acos(cosTheta);
+
+    // Convert radians to degrees
+    float angleDegrees = theta * 180.0 / M_PI;
+
+    return angleDegrees;
+}
 
 // For matrix
 
@@ -67,7 +88,6 @@ double* multiply(float* a, int row1, int col1, float* b, int row2, int col2)
 }
 
 // some Function for need for clipping
-
 float* intersection(float* currentPoint, float* nextPoint, float* f1, float* f2, bool strict = false) {
 
     float* A = new float[4] {
@@ -206,6 +226,23 @@ bool isClockWise(std::vector<float>lst) {
     return sum < 0;
 }
 
+bool isClockWise(const float* a, const float* b, const float* c) {
+    float crossProduct = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+
+    if (crossProduct > 0.0) {
+        // Counter-clockwise
+        return true;
+    }
+    else if (crossProduct < 0.0) {
+        // Clockwise
+        return false;
+    }
+    else {
+        // Collinear
+        return false;
+    }
+}
+
 bool isClockWisePoly(std::vector<float*>lst) {
     double sum = 0.0;
     float* S;
@@ -289,6 +326,9 @@ bool isInside(float point[2], std::vector<float> poly) {
 }
 
 #include "Polygone.h"
+#include <limits>
+#include <limits>
+#include <limits>
 
 
 
@@ -310,6 +350,7 @@ int isInterseptCriticalSegment(float* point, PolySeg poly) {
 std::vector<float*> SutherLandHodman(Entity Cpolly, Entity Window) {
     
     Entity PS;
+ 
     Entity PW = Window;
     Entity PL = Cpolly;
 
@@ -1197,4 +1238,81 @@ float* FillLCA(Entity Poly,float* lstColor,int width,int height,int minx,int min
  
 
     return lstColor;
+}
+
+
+std::vector<float*> GetPascal(int degre) {
+    std::vector<float*> triangles;
+
+    for (int i = 0; i < degre; i++)
+    {
+        float* v = new float[i + 1];
+        triangles.push_back(v);
+        triangles[i][0] = 1;
+        triangles[i][i] = 1;
+    
+        for (int j = 1; j < i; j++)
+        {
+            triangles[i][j] = triangles[i - 1][j - 1] + triangles[i - 1][j];
+        }
+    }
+
+    return triangles;
+}
+
+
+
+bool isCounterClockwise( float* a,  float* b,  float* c) {
+    float crossProduct = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+
+    return crossProduct > 0.0;
+}
+
+
+
+bool comparePoints( float* a,  float* b,  float* pivot) {
+    float angle1 = calculateAngle(a, pivot);
+    float angle2 = calculateAngle(b, pivot);
+
+    if (angle1 == angle2) {
+        float dist1 = distance(a, pivot);
+        float dist2 = distance(b, pivot);
+        return dist1 < dist2;
+    }
+
+    return angle1 < angle2;
+}
+
+std::vector<float*> convexShape(std::vector<float*> controls) {
+    if (controls.size() < 3) {
+        return std::vector<float*>();
+    }
+
+    std::vector<float*> hull;
+
+    // Trouver le point le plus à gauche comme point de départ
+    int leftmost = 0;
+    for (int i = 1; i < controls.size(); i++) {
+        if (controls[i][0] < controls[leftmost][0]) {
+            leftmost = i;
+        }
+    }
+
+    int current = leftmost;
+    int next;
+
+    do {
+        hull.push_back(controls[current]);
+        next = (current + 1) % controls.size();
+
+        for (int i = 0; i < controls.size(); i++) {
+            if (isCounterClockwise(controls[current], controls[i], controls[next])) {
+                next = i;
+            }
+        }
+
+        current = next;
+    } while (current != leftmost);
+
+    return hull;
 }

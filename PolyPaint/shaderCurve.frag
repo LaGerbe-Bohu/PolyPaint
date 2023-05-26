@@ -6,6 +6,11 @@ uniform vec2 u_mousePos;
 uniform mat4 u_projectionMatrix;
 uniform vec2 u_points[500];
 uniform int u_sizeOfPoints;
+uniform int u_indexSelectedPoint;
+
+uniform vec2 u_controle[500];
+uniform int u_sizeOfCtrls;
+
 uniform vec2 u_resolution;
 
 uniform vec2 u_listofpixel[100];
@@ -60,6 +65,7 @@ void main(void){
  //   vec2 position =  (u_mousePos.xy - .5*u_resolution.xy) / minres;
 
     vec3 src = vec3(0.0,0.0,0.0);
+    vec3 src1 = vec3(0.0,0.0,0.0);
     float dist = 0.0;
 
 
@@ -67,6 +73,7 @@ void main(void){
     {
         vec2 pt = u_points[i].xy/resolution.x;
         vec2 pt2 = u_points[i+1].xy/resolution.x;
+
         src += drawLine(pt,pt2,uv,0.001) * vec3(1.0,1.0,1.0);
     }
 
@@ -79,42 +86,38 @@ void main(void){
         src += drawLine(pt,pt2,uv,0.001) * vec3(144.0/255.0,18.0/255.0,208.0/255.0);
     }
 
+
     if(u_sizeOfFenetre >= 3){
            
         src += drawLine(u_fenetre[0]/resolution.x,u_fenetre[u_sizeOfFenetre-1]/resolution.x,uv,0.001) * vec3(144.0/255.0,18.0/255.0,208.0/255.0);
     }
 
 
-
-    vec3 PointF;
-    vec3 PointP;
+    vec3 PointF= vec3(0,0,0);;
+    vec3 PointP = vec3(0,0,0);
+    vec3 PointC= vec3(0,0,0);;
+     src = lerp(lerp(src, vec3(144.0/255.0,18.0/255.0,208.0/255.0),PointF.x),vec3(0.0,1.0,128.0/255.0),PointP.x);
 
     for(int i = 0; i <u_sizeOfPoints;i++)
     {
         vec2 pt = u_points[i].xy/resolution.x;
 
         float v = (sqrt( pow(pt.x - uv.x,2)+ (pow( pt.y - uv.y ,2) )) ) ; 
-        PointP += smoothstep(0.0068-0.001,0.0055-0.001,v);
+        
+        if(i == u_indexSelectedPoint){
+            PointP = vec3(smoothstep(0.01-0.001,0.009-0.001,v));
+            src += PointP*vec3(1,0,0);
+          
+        }
+        else{
+          PointP = vec3(smoothstep(0.0068-0.001,0.0055-0.001,v));
+            src += PointP*vec3(0.0,1.0,128.0/255.0);
+        }
         
     }
 
-     
 
-
-    for(int i = 0; i <u_sizeOfFenetre;i++)
-    {
-        vec2 f = u_fenetre[i].xy/resolution.x;
-        
-        float v =  (sqrt( pow(f.x - uv.x,2)+ (pow( f.y - uv.y ,2)) )) ; 
-        PointF += smoothstep(0.0068 -0.001,0.0055-0.001,v);
-    }
-
-
-  
-
-
-
-    src = lerp(lerp(src, vec3(144.0/255.0,18.0/255.0,208.0/255.0),PointF.x),vec3(0.0,1.0,128.0/255.0),PointP.x);
+   
     
     
    

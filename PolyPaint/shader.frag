@@ -6,6 +6,8 @@ uniform vec2 u_mousePos;
 uniform mat4 u_projectionMatrix;
 uniform vec2 u_points[500];
 uniform int u_sizeOfPoints;
+uniform int u_indexSelectedPoint;
+
 uniform vec2 u_resolution;
 
 uniform vec2 u_listofpixel[100];
@@ -94,16 +96,25 @@ void main(void){
     vec3 PointF;
     vec3 PointP;
 
+    src = lerp(lerp(src, vec3(144.0/255.0,18.0/255.0,208.0/255.0),PointF.x),vec3(0.0,1.0,128.0/255.0),PointP.x);
+
     for(int i = 0; i <u_sizeOfPoints;i++)
     {
         vec2 pt = u_points[i].xy/resolution.x;
 
         float v = (sqrt( pow(pt.x - uv.x,2)+ (pow( pt.y - uv.y ,2) )) ) ; 
-        PointP += smoothstep(0.0068-0.001,0.0055-0.001,v);
+        
+        if(i == u_indexSelectedPoint){
+            PointP = vec3(smoothstep(0.01-0.001,0.009-0.001,v));
+            src += PointP*vec3(1,0,0);
+          
+        }
+        else{
+          PointP = vec3(smoothstep(0.0068-0.001,0.0055-0.001,v));
+            src += PointP*vec3(0.0,1.0,128.0/255.0);
+        }
         
     }
-
-     
 
 
     for(int i = 0; i <u_sizeOfFenetre;i++)

@@ -3,8 +3,9 @@
 
 GLShader g_triangleShader;
 GLShader g_curveShader;
+GLShader g_Curves;
 
-float Screen[2]{ 1080,1000 };
+float Screen[2]{ 1920,1920 };
 
 double xpos, ypos;
 float* mousePos;
@@ -20,7 +21,9 @@ bool PolyEdit = true;
 bool WindoEdit = false;
 bool Sutherland = true;
 int currentSelectPoly = 0;
-
+float* k = new float[1] {0.05f};
+bool Lerp = true;
+bool moving = false;
 enum Input
 {
     FillCCitUpdate,
@@ -36,13 +39,15 @@ Input ClickInput;
 std::stack<int*> pile;
 bool fill = false;
 Polygone Poly;
-Polygone Wind;
+
+Entity Wind;
+Curve WindCurve;
 
 std::vector<Entity> lstPolygones;
 
 std::vector<float> lstofPixel;
 float *pixelScreens;
-
+bool move = false;
 std::vector<float*> lstOfPS;
 
 float** array2D(int n, int m, int val = 0) {
@@ -91,6 +96,20 @@ void loadTexture(int f, float* data,float with,float hieght) {
 }
 
 
+int findSelectedPoint(Entity ent) {
+
+
+    for (int i = 0; i < ent.getPoints().size(); i++)
+    {
+        if (distance(ent.getPoints()[i], mousePos) < 20.0f) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+
 void Initialize()
 {
 
@@ -103,7 +122,7 @@ void Initialize()
 
     Poly = Polygone();
     Wind = Polygone();
-
+    
 
     lstOfPS.push_back(pixelScreens);
     lstPolygones.push_back(Poly);
@@ -118,6 +137,10 @@ void Initialize()
     g_curveShader.LoadFragmentShader("../../../../PolyPaint/shaderCurve.frag");
     g_curveShader.LoadVertexShader("../../../../PolyPaint/shaderCurve.vert");
     g_curveShader.Create();
+
+    g_Curves.LoadFragmentShader("../../../../PolyPaint/Curves.frag");
+    g_Curves.LoadVertexShader("../../../../PolyPaint/Curves.vert");
+    g_Curves.Create();
 
 }
 
@@ -135,6 +158,10 @@ void MyLowLevelMouseButtonHandler(int button, bool down)
 
 }
 
+
+
+bool isMousePressed;
+
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -144,6 +171,16 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
     if (!io.WantCaptureMouse)
     {
+
+        if (button == GLFW_MOUSE_BUTTON_LEFT) {
+            if (action == GLFW_PRESS) {
+                isMousePressed = true;
+            }
+            else if (action == GLFW_RELEASE) {
+                isMousePressed = false;
+            }
+        }
+
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS )
         {
             switch (ClickInput)
@@ -188,7 +225,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                     }
                     ClickInput = AddPoly;
                 break;
+               
             }
+
+           
+          
         }
     }
 
@@ -201,6 +242,42 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_F && action == GLFW_PRESS)
     {
         Fenetrage = !Fenetrage;
+    }
+
+
+    if (key == GLFW_KEY_DELETE && action == GLFW_PRESS) {
+        if (lstPolygones[currentSelectPoly].getPoints().size() > 0) {
+
+            std::vector<float*>temp = std::vector<float*>(lstPolygones[currentSelectPoly].getPoints());
+            int idx = findSelectedPoint(lstPolygones[currentSelectPoly]);
+
+
+            if (idx >= 0 && idx < temp.size()) {
+                temp.erase(temp.begin() + idx);
+            }
+            moving = false;
+
+            lstPolygones[currentSelectPoly].setPoints(temp);
+        }
+    }
+
+    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        if (lstPolygones[currentSelectPoly].getPoints().size() > 0) {
+
+            std::vector<float*>temp = std::vector<float*>(lstPolygones[currentSelectPoly].getPoints());
+            std::vector<float*>temp2;
+            int idx = findSelectedPoint(lstPolygones[currentSelectPoly]);
+
+
+            for (int i = 0; i < temp.size(); i++)
+            {
+                temp2.push_back(temp[i]);
+                if (i == idx) {
+                    temp2.push_back(temp[i]);
+                }
+            }
+            lstPolygones[currentSelectPoly].setPoints(temp2);
+        }
     }
 
  
@@ -260,6 +337,12 @@ void RenderPolygone(int width, int height, int index) {
 
     glEnableVertexAttribArray(loc_uv);
 
+
+    const auto loc_size_selectedPoint = glGetUniformLocation(
+        sh_Triangle, "u_indexSelectedPoint"
+    );
+
+    glUniform1i(loc_size_selectedPoint, findSelectedPoint(lstPolygones[index]));
 
 
     const auto loc_float_texture = glGetUniformLocation(
@@ -448,6 +531,14 @@ void RenderCurve(int width, int height, int index) {
     glUniform1i(loc_size_point, int(tempVector.size() / 2));
 
 
+
+    const auto loc_size_selectedPoint = glGetUniformLocation(
+        sh_Triangle, "u_indexSelectedPoint"
+    );
+
+    glUniform1i(loc_size_selectedPoint, findSelectedPoint(lstPolygones[index]) );
+
+
     const auto loc_size_pixel = glGetUniformLocation(
         sh_Triangle, "u_sizePixel"
     );
@@ -456,9 +547,12 @@ void RenderCurve(int width, int height, int index) {
 
     tempVector = Wind.getFlatVector();
 
+
     if (tempVector.size() <= 0) {
         tempVector = blank;
     }
+
+
 
     const auto loc_fenetre = glGetUniformLocation(
         sh_Triangle, "u_fenetre"
@@ -473,6 +567,93 @@ void RenderCurve(int width, int height, int index) {
     glUniform1i(loc_size_fenetre, int(tempVector.size() / 2));
 
 
+
+    glDrawArrays(GL_QUADS, 0, 4);
+
+    // CHJANTGE SHAFER
+
+    auto sh_Curves = g_Curves.GetProgram();
+    glUseProgram(sh_Curves);
+
+
+
+    const auto loc_proj_mat_triangle_Curves = glGetUniformLocation(
+        sh_Curves, "u_projectionMatrix"
+    );
+    glUniformMatrix4fv(loc_proj_mat_triangle_Curves, 1, GL_FALSE, projectionMatrix);
+
+
+    const auto loc_postiion_Curves = glGetAttribLocation(
+        sh_Curves, "a_position"
+    );
+    glEnableVertexAttribArray(loc_postiion_Curves);
+    glVertexAttribPointer(loc_postiion_Curves, 2, GL_FLOAT, GL_FALSE,
+        stride, triangle);
+    glEnableVertexAttribArray(loc_postiion_Curves);
+
+
+    const auto loc_uv_Curves = glGetAttribLocation(
+        sh_Curves, "a_uv"
+    );
+    glEnableVertexAttribArray(loc_uv_Curves);
+    glVertexAttribPointer(loc_uv_Curves, 2, GL_FLOAT, GL_FALSE,
+        stride, uv);
+
+    glEnableVertexAttribArray(loc_uv_Curves);
+
+
+    glGetIntegerv(GL_VIEWPORT, m_viewport);
+
+    mousePos[0] = xpos;
+    mousePos[1] = height - ypos;
+
+
+    const auto loc_mouse_Curves = glGetUniformLocation(
+        sh_Curves, "u_mousePos"
+    );
+
+    glUniform2fv(loc_mouse_Curves, 1, &mousePos[0]);
+    glEnableVertexAttribArray(loc_mouse_Curves);
+
+
+    const auto loc_resolution_Curves = glGetUniformLocation(
+        sh_Curves, "u_resolution"
+    );
+    glUniform2fv(loc_resolution_Curves, 1, &Screen[0]);
+
+
+    std::vector<float> tempVector_Curves = lstPolygones[index].getFlatVectorControl();
+
+    if (tempVector_Curves.size() <= 0) {
+        tempVector_Curves = blank;
+    }
+
+    const auto loc_points_Curves = glGetUniformLocation(
+        sh_Curves, "u_points"
+    );
+
+    glUniform2fv(loc_points_Curves, tempVector_Curves.size(), &tempVector_Curves[0]);
+
+    const auto loc_size_point_Curves = glGetUniformLocation(
+        sh_Curves, "u_sizeOfPoints"
+    );
+
+    glUniform1i(loc_size_point_Curves, int(tempVector_Curves.size() / 2));
+
+
+    const auto loc_size_pixel_Curves = glGetUniformLocation(
+        sh_Curves, "u_sizePixel"
+    );
+
+    glUniform1i(loc_size_pixel_Curves, int(lstofPixel.size() / 2));
+
+
+    const auto color_Curves = glGetUniformLocation(
+        sh_Curves, "u_color"
+    );
+
+    glUniform3fv(color_Curves, 1, lstPolygones[index].color);
+    glEnableVertexAttribArray(color_Curves);
 
 
 
@@ -515,8 +696,6 @@ void Render(GLFWwindow* window)
 }
 
 
-
-
 void SwitchEdit() {
 
     PolyEdit = !PolyEdit;
@@ -527,6 +706,7 @@ void SwitchEdit() {
 
 int it = 0;
 
+int idxMoving = -1;
 int main(void)
 {
     GLFWwindow* window;
@@ -583,11 +763,11 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
        
-    
-
+         
+        glfwSetKeyCallback(window, key_callback);
         glfwSetMouseButtonCallback(window, mouse_button_callback);
         /* Poll for and process events */
-        glfwPollEvents();
+       
 
       //  std::cout << mousePos[0] << " " << mousePos[1] << std::endl;
 
@@ -597,6 +777,27 @@ int main(void)
         ImGui::NewFrame();
    
 
+        if (isMousePressed && lstPolygones[currentSelectPoly].getPoints().size() >0) {
+
+            if (moving == false) {
+                if (lstPolygones[currentSelectPoly].getPoints().size() > 0) {
+                    idxMoving = findSelectedPoint(lstPolygones[currentSelectPoly]);
+                }
+                moving = true;
+            }
+            
+            if (idxMoving >= 0) {
+                lstPolygones[currentSelectPoly].getPoints()[idxMoving][0] = mousePos[0];
+                lstPolygones[currentSelectPoly].getPoints()[idxMoving][1] = mousePos[1];
+            }
+
+          
+        }
+        else {
+            moving = false;
+        }
+
+        glfwPollEvents();
 
    /*     ImGui::ShowDemoWindow();
        
@@ -616,14 +817,14 @@ int main(void)
 
       
         colors[ImGuiCol_Button] = basicButton;
-        if (!PolyEdit) {
+        if (!PolyEdit && !move) {
            
-            if (ImGui::Button("Add point to the polygone")) {
+            if (ImGui::Button("Add point to the polygone") ) {
                 SwitchEdit();
             }
                 
         }
-        else {
+        else if (!move) {
             colors[ImGuiCol_Button] = ImVec4(0.00f, 1.0, 128.0 / 255.0, 0.5);
             if (ImGui::Button("Stop adding point to the polygone") )
             {
@@ -648,9 +849,9 @@ int main(void)
         ImGui::Text("Window Manager");
   
         colors[ImGuiCol_Button] = basicButton;
-        if (!WindoEdit) {
+        if (!WindoEdit && !move) {
           
-            if (ImGui::Button("Add point to the Windo")) {
+            if (ImGui::Button("Add point to the Windo") ) {
                 SwitchEdit();
             }
       
@@ -658,7 +859,7 @@ int main(void)
 
 
         }
-        else {
+        else if(!move) {
             colors[ImGuiCol_Button] = ImVec4(144.0 / 255.0, 18.0 / 255.0, 208.0 / 255.0, .5);
            
             if (ImGui::Button("Stop adding point to the Windo")) {
@@ -666,6 +867,7 @@ int main(void)
             }
                
         }
+     
 
         ImGui::Spacing();
         colors[ImGuiCol_Button] = ImVec4(144.0 / 255.0, 18.0 / 255.0, 208.0 / 255.0, .5);
@@ -674,10 +876,23 @@ int main(void)
             Wind.setPoints(std::vector<float*>());
         }
 
+        colors[ImGuiCol_Button] = ImVec4(255.0 / 255.0, 18.0 / 255.0, 50.0 / 255.0, .5);
+        if (ImGui::Button("Moving vertex")) {
+            move = !move;
+            if (move) {
+                PolyEdit = false;
+                WindoEdit = false;
+            }
+            else {
+                PolyEdit = true;
+                WindoEdit = false;
+            }
 
-
-
+        }
         colors[ImGuiCol_Button] = basicButton;
+
+
+ 
 
         ImGui::NewLine();
         ImGui::Spacing();
@@ -693,9 +908,9 @@ int main(void)
             
                // lstPoints = SutherLandHodman(lstPoints, lstPointsFenetre);
                 Wind.push_back(Wind[0]);
-      
+                type _Type = lstPolygones[currentSelectPoly].getType();
                 lstPolygones[currentSelectPoly] = SutherLandHodman(lstPolygones[currentSelectPoly], Wind);
-                
+                lstPolygones[currentSelectPoly].setType(_Type);
                
             }
             ImGui::Spacing();
@@ -1001,7 +1216,7 @@ int main(void)
 
         ImGui::SameLine();
 
-        if (ImGui::Button("Remove Polygone")) {
+        if (ImGui::Button("Remove Polygone") && lstPolygones.size() >1) {
             lstPolygones.erase(lstPolygones.begin() + currentSelectPoly);
 
             currentSelectPoly = (currentSelectPoly + 1) % lstPolygones.size();
@@ -1069,18 +1284,21 @@ int main(void)
         if (lstPolygones[currentSelectPoly].getType() == Cur) {
             ImGui::Begin("Calcul Curve");
 
-            float* k = new float[1] {0.05f};
-            ImGui::SliderFloat("Valeur du pas", k, 0.05f, 1.0f);
-          
-            if (ImGui::Button("CastelJou") && lstPolygones[currentSelectPoly].getPoints().size() > 0) {
-               
-              
+            
+            ImGui::SliderFloat("Valeur du pas", k, 0.005f, .5f);
+            
+            (*lstPolygones[currentSelectPoly].getCTRL()).clear();
 
+            ImGui::Checkbox("mycheckbox", &Lerp);
+
+            if ( Lerp && lstPolygones[currentSelectPoly].getPoints().size() > 0) {
+               
+                auto start = std::chrono::system_clock::now();
                 std::vector<float*> tempPoints;
                 std::vector<float*> newPoints;
                 Entity p = lstPolygones[currentSelectPoly];
                 tempPoints = std::vector<float*>(p.getPoints());
-        
+                lstPolygones[currentSelectPoly].color = new float[3] {245, 216, 73};
                 newPoints.push_back(p.getPoints()[0]);
                 for (float t = 0; t <= 1; t += *k)
                 {
@@ -1104,17 +1322,95 @@ int main(void)
                     newPoints.push_back(control[0]);
                 }
 
-                lstPolygones[currentSelectPoly].setPoints(newPoints);
+                lstPolygones[currentSelectPoly].setCTRls(newPoints);
+                auto end = std::chrono::system_clock::now();
+                std::chrono::duration<double> elapsed_seconds = end - start;
+                std::cout << elapsed_seconds.count()*1000 << std::endl;
 
             }
+            else if(lstPolygones[currentSelectPoly].getPoints().size() > 0){
+                auto start = std::chrono::system_clock::now();
+                int size = lstPolygones[currentSelectPoly].getPoints().size()-1;
+                std::vector<float*> pascal = GetPascal(size+1);
+                std::vector<float*> tempPoints;
+                std::vector<float*> Points = lstPolygones[currentSelectPoly].getPoints();
+
+                lstPolygones[currentSelectPoly].color = new float[3] {88, 116, 226};
+
+                for (float t = 0; t <= 1; t += *k)
+                {
+                    float x = 0.0;
+                    float y = 0.0;
+
+                    float* p = new float[2] {0.0, 0.0 };
+
+                    for (int i = 0; i <= size; i++)
+                    {
+                        double blend = pascal[size][i] * std::pow(t, i) * std::pow(1 - t, size - i);
+                        x += blend * Points[i][0];
+                        y += blend * Points[i][1];
+
+                        
+                    }
+                    p[0] = x;
+                    p[1] = y;
+                    tempPoints.push_back(p);
+                
+                }
+                lstPolygones[currentSelectPoly].setCTRls(tempPoints);
+                auto end = std::chrono::system_clock::now();
+                std::chrono::duration<double> elapsed_seconds = end - start;
+                std::cout << elapsed_seconds.count()*1000 << std::endl;
+            }
          
+
+            if (ImGui::Button("add ConvexShape")) {
+      
+                Polygone pol = Polygone();
+                std::vector<float*> curves = convexShape(*lstPolygones[currentSelectPoly].getCTRL());
+
+                for (int i = 0; i < lstPolygones[currentSelectPoly].getCTRL()->size(); i++)
+                {
+                    std::cout << (*lstPolygones[currentSelectPoly].getCTRL())[i][0] << " , " << (*lstPolygones[currentSelectPoly].getCTRL())[i][1] << std::endl;
+                }
+
+                std::cout << " convex shape" << std::endl;
+                for (int i = 0; i < curves.size(); i++)
+                {
+                    std::cout << curves[i][0] << " , " << curves[i][1] << std::endl;
+                }
+
+                std::cout << curves.size() << std::endl;
+                lstPolygones.push_back(pol);
+                currentSelectPoly++;
+                float* f = new float[Screen[0] * Screen[1]];
+                lstOfPS.push_back(f);
+
+                for (int i = 0; i < Screen[0]; i++) {
+                    for (int j = 0; j < Screen[1]; j++) {
+                        lstOfPS[currentSelectPoly][((int)Screen[0] * j) + i] = 0.0;
+                    }
+                }
+
+                lstPolygones[currentSelectPoly].setPoints(curves);
+
+            }
+
 
             ImGui::SetWindowSize(ImVec2(300, 150));
             ImGui::End();
         }
+       
+
+
 
         /* Render here */
         ImGui::Render();
+
+
+
+
+
         Render(window);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -1122,9 +1418,6 @@ int main(void)
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
-      
-        
-     
 
     }
 

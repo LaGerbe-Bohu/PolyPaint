@@ -5,15 +5,26 @@ enum type { Pol,Cur,Ent };
 class Entity {
 
 	std::vector<float*> Points;
+	std::vector<float*> Ctrls;
+
 	type _Type;
+
+
 	public :
 		
+		float* color;
+		int currentSelectPoint = -1;
+		Entity() :Points(std::vector<float*>()) {
+			color = new float[3] {0.0, 0.0, 0.0 };
+		}
 
-		Entity() :Points(std::vector<float*>()) { }
+		Entity(std::vector<float*> P) : Points(P) { 
+			color = new float[3] {0.0, 0.0, 0.0 };
+		}
 
-		Entity(std::vector<float*> P) : Points(P) { }
-
-		Entity(const Entity& p) : Points(p.Points),_Type(p._Type) { };
+		Entity(const Entity& p) : Points(p.Points),_Type(p._Type) {
+			color = new float[3] {0.0, 0.0, 0.0 };
+		};
 
 		void push_back(float* b) {
 			float* p = new float[2] {b[0], b[1]};
@@ -42,6 +53,22 @@ class Entity {
 
 		}
 
+		std::vector<float*>* getCTRL() {
+			return &Ctrls;
+		}
+
+		void setCTRls(std::vector<float*> p) {
+
+			Ctrls.clear();
+			for (int i = 0; i < p.size(); i++)
+			{
+				float* b = new float[2] {p[i][0], p[i][1]};
+				Ctrls.push_back(b);
+			}
+
+		}
+
+
 		std::vector<float> getFlatVector() {
 			std::vector<float> t;
 
@@ -61,6 +88,16 @@ class Entity {
 			Points.clear();
 		}
 
+		std::vector<float> getFlatVectorControl() {
+			std::vector<float> t;
+
+			for (int i = 0; i < Ctrls.size(); i++) {
+				t.push_back(Ctrls[i][0]);
+				t.push_back(Ctrls[i][1]);
+			}
+
+			return t;
+		}
 
 };
 
@@ -176,14 +213,26 @@ class LCA {
 class Curve: public Polygone {
 
 	std::vector<float*> Points;
+	std::vector<float*> Ctrls;
 	public:
 
-	Curve() :Points(std::vector<float*>()) {
+	Curve() :Points(std::vector<float*>()), Ctrls(std::vector<float*>()) {
 		setType(Cur);
 	}
 
 	Curve(std::vector<float*> P) : Points(P) {
 		setType(Cur);
 	};
+
+	std::vector<float> getFlatVectorControl() {
+		std::vector<float> t;
+
+		for (int i = 0; i < Ctrls.size(); i++) {
+			t.push_back(Ctrls[i][0]);
+			t.push_back(Ctrls[i][1]);
+		}
+
+		return t;
+	}
 };
 
